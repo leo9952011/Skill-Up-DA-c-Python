@@ -1,2 +1,1 @@
-pytest
-apache-airflow
+python-decouple==3.6

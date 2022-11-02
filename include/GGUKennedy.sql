@@ -1,13 +1,16 @@
-SELECT  universidades, 
-		carreras, 
-		fechas_de_inscripcion, 
-		nombres, 
-		sexo, 
-		fechas_nacimiento, 
-		codigos_postales,
-		emails
+SELECT  universidades AS university,
+		carreras AS career, 
+		fechas_de_inscripcion AS inscription_date, 
+		NULL AS first_name,
+		nombres AS last_name, 
+		sexo AS gender, 
+		fechas_nacimiento,
+		NULL AS age, 
+		codigos_postales AS postal_code,
+		NULL AS location,
+		emails AS email
 FROM 
     uba_kenedy uk 
 WHERE 
     uk.universidades = 'universidad-j.-f.-kennedy'
-    AND TO_DATE(uk.fechas_de_inscripcion,'YY-MON-DD') BETWEEN '2020-09-01' AND '2021-02-01';
+    AND TO_DATE(uk.fecha_de_inscripcion,'YY-MON-DD') BETWEEN '2020-09-01' AND '2021-02-01';

@@ -1,11 +1,14 @@
-SELECT  universities, 
-        careers, 
-		inscription_dates, 
-		names, 
-		sexo, 
+SELECT  universities AS university, 
+        careers AS career, 
+		inscription_dates AS inscription_date, 
+		NULL AS first_name,
+		names AS last_name, 
+		sexo AS gender, 
 		birth_dates, 
-		locations,
-		emails
+		NULL AS age,
+		NULL AS postal_code,
+		locations AS location,
+		emails AS email
 FROM 
 	lat_sociales_cine lsc 
 WHERE 

@@ -1,0 +1,6 @@
+# este no está en .gitignore debería subir al repo aldo
+
+
+
+
+

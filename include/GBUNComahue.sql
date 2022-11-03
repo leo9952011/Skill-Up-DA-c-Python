@@ -33,3 +33,4 @@ SELECT
 FROM public.flores_comahue
 WHERE universidad = 'UNIV. NACIONAL DEL COMAHUE'
 	AND TO_DATE(fecha_de_inscripcion,'YYYY-MM-DD') BETWEEN '2020/09/01' AND '2021/02/01'
+

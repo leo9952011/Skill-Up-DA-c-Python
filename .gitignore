@@ -1,12 +1,7 @@
-__pycache__/
+__pycache__
+.\my_env
 .git
 .env
 airflow_settings.yaml
 astro
-este_NO_sube_al_repositorio_aldo.txt
-<<<<<<< Updated upstream
 
-=======
-.\my_env
-*\_pycache_
->>>>>>> Stashed changes

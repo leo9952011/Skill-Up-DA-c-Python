@@ -33,5 +33,3 @@ SELECT
 FROM public.salvador_villa_maria
 WHERE universidad = 'UNIVERSIDAD_DEL_SALVADOR'
 	AND TO_DATE(fecha_de_inscripcion,'DD-Mon-YY') BETWEEN '2020/09/01' AND '2021/02/01'
-
-

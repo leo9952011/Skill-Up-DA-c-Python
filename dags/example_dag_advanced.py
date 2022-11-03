@@ -8,7 +8,7 @@ from typing import Dict
 from airflow.decorators import dag, task # DAG and task decorators for interfacing with the TaskFlow API
 from airflow.models.baseoperator import chain # A function that sets sequential dependencies between tasks including lists of tasks.
 from airflow.operators.bash import BashOperator
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.operators.email import EmailOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.operators.weekday import BranchDayOfWeekOperator
@@ -118,9 +118,9 @@ def _get_activity(day_name) -> str:
 )
 def example_dag_advanced():
     # DummyOperator placeholder for first task
-    begin = DummyOperator(task_id="begin")
+    begin = EmptyOperator(task_id="begin")
     # Last task will only trigger if no previous task failed
-    end = DummyOperator(task_id="end", trigger_rule=TriggerRule.NONE_FAILED)
+    end = EmptyOperator(task_id="end", trigger_rule=TriggerRule.NONE_FAILED)
 
     # This task checks which day of the week it is
     check_day_of_week = BranchDayOfWeekOperator(
@@ -131,8 +131,8 @@ def example_dag_advanced():
         use_task_execution_day=True, # If True, uses task’s execution day to compare with is_today
     )
 
-    weekend = DummyOperator(task_id="weekend") # "weekend" placeholder task
-    weekday = DummyOperator(task_id="weekday") # "weekday" placeholder task
+    weekend = EmptyOperator(task_id="weekend") # "weekend" placeholder task
+    weekday = EmptyOperator(task_id="weekday") # "weekday" placeholder task
 
     # Templated value for determining the name of the day of week based on the start date of the DAG Run
     day_name = "{{ dag_run.start_date.strftime('%A').lower() }}"

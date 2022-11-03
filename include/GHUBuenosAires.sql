@@ -1,5 +1,5 @@
 -- Grupo de Universidades H
--- Necesito para UNComahue y UdelSalvador, 
+-- Necesito para U. Buenos Aires y U. de Cine, 
 -- personas anotadas entre las fechas 01/9/2020 al 01/02/2021
 --
 -- university
@@ -14,9 +14,8 @@
 -- email
 --
 -- las columnas que no tengo (*) las genero con valor NULL
--- TO_DATE <https://www.postgresqltutorial.com/postgresql-date-functions/postgresql-to_date/>
--- SPLIT para pasar de nombre a first_name, last_name
--- Para UdelSalvador
+
+-- Para Universidad de Buenos Aires
 
 select
     universidades as  university,

@@ -1,3 +1,21 @@
+-- Grupo de Universidades H
+-- Necesito para U. Buenos Aires y U. de Cine, 
+-- personas anotadas entre las fechas 01/9/2020 al 01/02/2021
+--
+-- university
+-- career
+-- inscription_date
+-- * first_name
+-- * last_name
+-- gender
+-- * age
+-- * postal_code
+-- location
+-- email
+--
+-- las columnas que no tengo (*) las genero con valor NULL
+
+-- Para Universidad de Cine
 select
     universities as university,
     careers as career,

@@ -54,8 +54,8 @@ def get_query(path:List):
 def sql_execute():
     log.info('INIT sql EXECUTE')
     
-    path_rio_Cuarto = get_query([r'include\UNRioCuarto.sql'])
-    path_Moron = get_query([r'include\UMoron.sql'])
+    path_rio_Cuarto = get_query([r'include\GFUNRioCuarto.sql'])
+    path_Moron = get_query([r'include\GFUMoron.sql'])
     
     log.info('conection to database')
     try:

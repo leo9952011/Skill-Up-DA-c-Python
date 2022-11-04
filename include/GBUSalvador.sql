@@ -13,9 +13,13 @@
 -- location
 -- email
 --
--- las columnas que no tengo (*) las genero con valor NULL
+-- columnas que no tengo (*)
+-- en last_name traigo nombre 
+-- first_name, age y postal_code las genero con valor NULL
+-- y en un paso posterior las transformo con pandas
+--
 -- TO_DATE <https://www.postgresqltutorial.com/postgresql-date-functions/postgresql-to_date/>
--- SPLIT para pasar de nombre a first_name, last_name
+--
 -- Para UdelSalvador
 
 SELECT

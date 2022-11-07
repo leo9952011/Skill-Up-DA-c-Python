@@ -179,7 +179,8 @@ dmypy.json
 # Needed for CI Dockerfile.ci build system
 .build
 /tmp
-/files
+# CONFLICT with project local files folder
+# /files
 
 /hive_scratch_dir/
 /.bash_aliases
@@ -237,3 +238,4 @@ airflow_setttings.yaml
 
 # Docker settings for mount
 docker-compose.override.yml
+.devcontainer

@@ -13,4 +13,4 @@ FROM
     uba_kenedy uk 
 WHERE 
     uk.universidades = 'universidad-j.-f.-kennedy'
-    AND TO_DATE(uk.fecha_de_inscripcion,'YY-MON-DD') BETWEEN '2020-09-01' AND '2021-02-01';
+    AND TO_DATE(uk.fechas_de_inscripcion,'YY-MON-DD') BETWEEN '2020-09-01' AND '2021-02-01';

@@ -5,9 +5,6 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
-
-from pandas import DataFrame
-
 from pathlib import Path
 
 

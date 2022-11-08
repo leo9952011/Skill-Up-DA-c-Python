@@ -6,7 +6,7 @@ def create_logger():
 
     logger = logging.getLogger('Dag_logger') 
     logger.setLevel(logging.INFO) 
-    logfile = logging.FileHandler(r'C:\Users\Usuario\Desktop\Alk-Project-Py\Skill-Up-DA-c-Python\dags\logs\log_file.log') 
+    logfile = logging.FileHandler(r'/usr/local/airflow/files/log_file.log') 
     fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt) 
     logfile.setFormatter(formatter) 
@@ -31,9 +31,13 @@ from airflow.decorators import (
     tags=['example'])
 def dagNz():
     @task()
-    def printinfo():
-        log.info("log de info")
-        print('hello logger')
+    def data():
+        log.info("SQL Query")
+        with open(r'/usr/local/airflow/include/GFUNRioCuarto.sql', 'r') as myfile:
+            sql_query = myfile.read()
+            print(sql_query)
+            
+        
     @task()
     def printwarning():
         log.warning("log de warning")
@@ -42,7 +46,7 @@ def dagNz():
     def printcritical():
         log.critical("log error critico")
         
-    printinfo()
+    data()
     printwarning()
     printcritical()
 

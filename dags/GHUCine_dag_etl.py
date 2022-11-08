@@ -6,6 +6,8 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
 
+from pandas import DataFrame
+
 from pathlib import Path
 
 
@@ -20,17 +22,17 @@ def extract_data():
     hook = PostgresHook(postgres_conn_id="postgres_univ")
     df = hook.get_pandas_df(sql=query)
 
-    file_path = Path("/usr/local/airflow/files/GHUCine.sql")
+    file_path = Path("/usr/local/airflow/files/GHUCine_select.csv")
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    return df.to_csv(file_path, header=False, index=False)
+    return df.to_csv(file_path, header=True, index=False)
 
 
 with DAG(
     "Universidad_Cine_etl",
     default_args={
         "retries": 5,
-        "retry_delay": timedelta(seconds=10),
+        "retry_delay": timedelta(minutes=5),
     },
     description="Realiza un ETL de los datos de la Universidad de Cine.",
     schedule=timedelta(hours=1),

@@ -7,18 +7,27 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
-
 import logging
+import logging.config
 
-logger = logging.getLogger(__name__)
-FORMAT = "%(asctime)s -  - %(message)s"
-logging.basicConfig(filename="logs/dags.log")
+# Path del logger.cfg
+BASE_DIR = Path().parent.parent
 
-print(f"el nombre es: logger.name")
+logger_cfg = BASE_DIR / "logger.cfg"
+
+logging.config.fileConfig(
+    fname=logger_cfg,
+)
+# Crear el logger ya configurado.
+logger = logging.getLogger("GHUBuenos_Aires_dag_etl")
 
 
 def extract_data():
+
+    logger.warning("test")
+
     # Antes de ejecutar asegurarse de crear la conexion.
+    logger.warning("probando")
 
     # Consulta sql.
     sql_path = Path("/usr/local/airflow/include/GHUBuenosAires.sql")

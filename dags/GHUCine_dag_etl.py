@@ -25,6 +25,10 @@ def extract_data():
     return df.to_csv(file_path, header=True, index=False)
 
 
+def transform_data():
+    pass
+
+
 with DAG(
     "Universidad_Cine_etl",
     default_args={
@@ -43,7 +47,7 @@ with DAG(
 
     # Utilizar PythonOperator
     # Se debe realizar una funcion que levante los csv obtenidos del proceso de extracción y los transforme acorde a las necesidades.
-    transform = EmptyOperator(task_id="transform")
+    transform = PythonOperator(task_id="transform", python_callable=transform_data)
 
     # Utilizar Providers de Amazon para la carga de datos.
     # https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html

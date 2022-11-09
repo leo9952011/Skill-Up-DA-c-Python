@@ -3,7 +3,7 @@ SELECT
 	NULL AS first_name,
 	sexo AS gender,
 	email AS email,
-	fechas_nacimiento,
+	fechas_nacimiento AS birth,
 	NULL AS age,
 	univiersities AS university,
 	inscription_dates AS inscription_date,

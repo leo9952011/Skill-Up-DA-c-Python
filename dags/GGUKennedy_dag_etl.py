@@ -9,7 +9,7 @@ from airflow.operators.empty import EmptyOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
-with DAG('GFUKennedy_dag_etl',
+with DAG('GGUKennedy_dag_etl',
         start_date=datetime(2022,11,1),
         catchup=False,
         schedule_interval='@hourly',
@@ -22,7 +22,7 @@ with DAG('GFUKennedy_dag_etl',
         Get UKennedy data from remote postgres DB and save to csv file locally.
         files/GGUKennedy_select.csv
         """
-
+        
         local_basepath = Path(__file__).resolve().parent.parent
 
         # Read SQL query
@@ -37,6 +37,7 @@ with DAG('GFUKennedy_dag_etl',
         # save df data to csv locally
         csv_filepath = local_basepath / 'files/GGUKennedy_select.csv'
         uni_df.to_csv(csv_filepath, sep=',', header=True, encoding='utf-8')
+        
 
     @task(task_id='transform', retries=5)
     def transform(dataset1):
@@ -44,7 +45,7 @@ with DAG('GFUKennedy_dag_etl',
 
         # Will use PythonOperator
         print(f'Transform all data task placeholder... {dataset1}')
-
+        
 
     # Load FLACSO data from local txt to S3. Uses LocalFilesystemToS3Operator Operator.
     load = EmptyOperator(

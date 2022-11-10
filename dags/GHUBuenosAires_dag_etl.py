@@ -7,27 +7,8 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
-import logging
-import logging.config
-
-# Path del logger.cfg
-BASE_DIR = Path().parent.parent
-
-logger_cfg = BASE_DIR / "logger.cfg"
-
-logging.config.fileConfig(
-    fname=logger_cfg,
-)
-# Crear el logger ya configurado.
-logger = logging.getLogger("GHUBuenos_Aires_dag_etl")
-
 
 def extract_data():
-
-    logger.warning("test")
-
-    # Antes de ejecutar asegurarse de crear la conexion.
-    logger.warning("probando")
 
     # Consulta sql.
     sql_path = Path("/usr/local/airflow/include/GHUBuenosAires.sql")
@@ -51,7 +32,7 @@ with DAG(
     },
     description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 2),
+    start_date=datetime(2022, 11, 9),
     tags=["etl"],
 ) as dag:
 

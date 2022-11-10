@@ -7,9 +7,18 @@ from airflow.operators.empty import EmptyOperator
 
 from pathlib import Path
 
+import logging
+import logging.config
+
+
+def configure_logger():
+    LOGGING_CONFIG = Path(__file__).parent.parent / "logger.cfg"
+    logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
+    logger = logging.getLogger("GHUCine_dag_etl")
+    return logger
+
 
 def extract_data():
-    # Antes de ejecutar asegurarse de crear la conexion.
 
     # Consulta sql.
     sql_path = Path("/usr/local/airflow/include/GHUCine.sql")
@@ -37,7 +46,7 @@ with DAG(
     },
     description="Realiza un ETL de los datos de la Universidad de Cine.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 2),
+    start_date=datetime(2022, 11, 9),
     tags=["etl"],
 ) as dag:
 

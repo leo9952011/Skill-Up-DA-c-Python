@@ -7,8 +7,21 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
+import logging
+import logging.config
+
+
+def configure_logger():
+    LOGGING_CONFIG = Path(__file__).parent.parent / "logger.cfg"
+    logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
+    logger = logging.getLogger("GHUBuenos_Aires_dag_etl")
+    return logger
+
 
 def extract_data():
+
+    logger = configure_logger()
+    logger.info("Start of extraction task")
 
     # Consulta sql.
     sql_path = Path("/usr/local/airflow/include/GHUBuenosAires.sql")
@@ -20,6 +33,8 @@ def extract_data():
 
     file_path = Path("/usr/local/airflow/files/GHUBuenosAires_select.csv")
     file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Done...")
 
     return df.to_csv(file_path, header=True, index=False)
 

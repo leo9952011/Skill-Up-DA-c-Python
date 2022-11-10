@@ -20,6 +20,9 @@ def configure_logger():
 
 def extract_data():
 
+    logger = configure_logger()
+    logger.info("Start of extraction task")
+
     # Consulta sql.
     sql_path = Path("/usr/local/airflow/include/GHUCine.sql")
     query = open(sql_path).read()
@@ -30,6 +33,8 @@ def extract_data():
 
     file_path = Path("/usr/local/airflow/files/GHUCine_select.csv")
     file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Done...")
 
     return df.to_csv(file_path, header=True, index=False)
 

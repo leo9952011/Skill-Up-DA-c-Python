@@ -1,11 +1,9 @@
-<<<<<<< HEAD
+
 __pycache__
-=======
 __pycache__/
->>>>>>> master-duplicada
 .git
 .env.env
 airflow_settings.yaml
 astro
-este_NO_sube_al_repositorio_aldo.txt
+
 

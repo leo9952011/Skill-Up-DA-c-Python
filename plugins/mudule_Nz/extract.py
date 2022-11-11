@@ -4,9 +4,12 @@ from typing import TypeVar
 from pathlib import Path
 
 
+
+
 PathLike = TypeVar("PathLike", str, Path, None)
 
 def std_extract(sql_path: PathLike,csv_path : PathLike):
+    
     df = False
     logging.info('preparing sql execution')
     try:
@@ -21,4 +24,5 @@ def std_extract(sql_path: PathLike,csv_path : PathLike):
         logging.warning('sql execution failed U.N.RIO-CUART')
         pass
     return df
-        
+
+

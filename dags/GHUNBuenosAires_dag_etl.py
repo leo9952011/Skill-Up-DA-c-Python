@@ -6,22 +6,25 @@ from airflow import DAG
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 import logging
 import logging.config
 
 from plugins.GH_transform import transform_df
 
+
 BASE_DIR = Path(__file__).parent.parent
 sql_file_name = "GHUNBuenosAires.sql"
 csv_file_name = "GHUNBuenosAires_select.csv"
-txt_file_name = "GHUNBuenosAires_datasets.txt"
+txt_file_name = "GHUNBuenosAires_process.txt"
+logger_name = "GHUNBuenosAires_dag_etl"
 
 
 def configure_logger():
     LOGGING_CONFIG = BASE_DIR / "logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(logger_name)
     return logger
 
 
@@ -35,7 +38,7 @@ def extract_data():
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
-    hook = PostgresHook(postgres_conn_id="postgres_univ")
+    hook = PostgresHook(postgres_conn_id="alkemy_db")
     df = hook.get_pandas_df(sql=query)
 
     file_path = BASE_DIR / f"files/{csv_file_name}"
@@ -47,6 +50,7 @@ def extract_data():
 
 
 def transform_data():
+
     logger = configure_logger()
     logger.info("Start of transform task")
 
@@ -58,11 +62,26 @@ def transform_data():
     logger.info("Done...")
 
 
+def load_data():
+    logger = configure_logger()
+    logger.info("Start load task")
+
+    s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
+    s3_hook.load_file(
+        BASE_DIR / "datasets/GHUNBuenosAires_process.txt",
+        bucket_name="alkemy-gh",
+        replace=True,
+        key=f"process/{txt_file_name}",
+    )
+
+    logger.info("Done...")
+
+
 with DAG(
     "Universidad_Buenos_Aires_etl",
     default_args={
         "retries": 5,
-        "retry_delay": timedelta(seconds=5),
+        "retry_delay": timedelta(minutes=5),
     },
     description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
     schedule=timedelta(hours=1),
@@ -80,6 +99,6 @@ with DAG(
 
     # Utilizar Providers de Amazon para la carga de datos.
     # https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html
-    load = EmptyOperator(task_id="load")
+    load = PythonOperator(task_id="load", python_callable=load_data)
 
     extract >> transform >> load

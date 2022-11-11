@@ -14,7 +14,7 @@ import logging.config
 def configure_logger():
     LOGGING_CONFIG = Path(__file__).parent.parent / "logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger("GHUCine_dag_etl")
+    logger = logging.getLogger("GHUNCine_dag_etl")
     return logger
 
 
@@ -24,14 +24,14 @@ def extract_data():
     logger.info("Start of extraction task")
 
     # Consulta sql.
-    sql_path = Path("/usr/local/airflow/include/GHUCine.sql")
+    sql_path = Path("/usr/local/airflow/include/GHUNCine.sql")
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
     hook = PostgresHook(postgres_conn_id="postgres_univ")
     df = hook.get_pandas_df(sql=query)
 
-    file_path = Path("/usr/local/airflow/files/GHUCine_select.csv")
+    file_path = Path("/usr/local/airflow/files/GHUNCine_select.csv")
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Done...")
@@ -51,7 +51,7 @@ with DAG(
     },
     description="Realiza un ETL de los datos de la Universidad de Cine.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 9),
+    start_date=datetime(2022, 11, 11),
     tags=["etl"],
 ) as dag:
 
@@ -61,7 +61,7 @@ with DAG(
 
     # Utilizar PythonOperator
     # Se debe realizar una funcion que levante los csv obtenidos del proceso de extracción y los transforme acorde a las necesidades.
-    transform = PythonOperator(task_id="transform", python_callable=transform_data)
+    transform = EmptyOperator(task_id="Transform")
 
     # Utilizar Providers de Amazon para la carga de datos.
     # https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html

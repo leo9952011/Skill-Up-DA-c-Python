@@ -10,11 +10,18 @@ from airflow.operators.empty import EmptyOperator
 import logging
 import logging.config
 
+from plugins.GH_transform import transform_df
+
+BASE_DIR = Path(__file__).parent.parent
+sql_file_name = "GHUNBuenosAires.sql"
+csv_file_name = "GHUNBuenosAires_select.csv"
+txt_file_name = "GHUNBuenosAires_datasets.txt"
+
 
 def configure_logger():
-    LOGGING_CONFIG = Path(__file__).parent.parent / "logger.cfg"
+    LOGGING_CONFIG = BASE_DIR / "logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger("GHUBuenos_Aires_dag_etl")
+    logger = logging.getLogger(__name__)
     return logger
 
 
@@ -24,19 +31,31 @@ def extract_data():
     logger.info("Start of extraction task")
 
     # Consulta sql.
-    sql_path = Path("/usr/local/airflow/include/GHUBuenosAires.sql")
+    sql_path = BASE_DIR / f"include/{sql_file_name}"
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
     hook = PostgresHook(postgres_conn_id="postgres_univ")
     df = hook.get_pandas_df(sql=query)
 
-    file_path = Path("/usr/local/airflow/files/GHUBuenosAires_select.csv")
+    file_path = BASE_DIR / f"files/{csv_file_name}"
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("Done...")
 
     return df.to_csv(file_path, header=True, index=False)
+
+
+def transform_data():
+    logger = configure_logger()
+    logger.info("Start of transform task")
+
+    df_path = BASE_DIR / f"files/{csv_file_name}"
+    output_path = BASE_DIR / f"datasets/{txt_file_name}"
+
+    transform_df(df_path, output_path)
+
+    logger.info("Done...")
 
 
 with DAG(
@@ -47,7 +66,7 @@ with DAG(
     },
     description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 9),
+    start_date=datetime(2022, 11, 11),
     tags=["etl"],
 ) as dag:
 
@@ -57,7 +76,7 @@ with DAG(
 
     # Utilizar PythonOperator
     # Se debe realizar una funcion que levante los csv obtenidos del proceso de extracción y los transforme acorde a las necesidades.
-    transform = EmptyOperator(task_id="transform")
+    transform = PythonOperator(task_id="Transform", python_callable=transform_data)
 
     # Utilizar Providers de Amazon para la carga de datos.
     # https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html

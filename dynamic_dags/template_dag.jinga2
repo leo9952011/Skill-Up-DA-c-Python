@@ -15,10 +15,13 @@ from plugins.GH_transform import transform_df
 
 
 BASE_DIR = Path(__file__).parent.parent
-sql_file_name = "GHUNBuenosAires.sql"
-csv_file_name = "GHUNBuenosAires_select.csv"
-txt_file_name = "GHUNBuenosAires_process.txt"
-logger_name = "GHUNBuenosAires_dag_etl"
+# agregar conn db y s3
+# agregar tiempos
+# agregar retry
+sql_file_name = "{{sql_file_name}}"
+csv_file_name = "{{csv_file_name}}"
+txt_file_name = "{{txt_file_name}}"
+logger_name = "{{logger_name}}"
 
 
 def configure_logger():
@@ -69,7 +72,7 @@ def load_data():
     s3_hook = S3Hook(aws_conn_id="{{s3_conn_id}}")
     s3_hook.load_file(
         BASE_DIR / f"datasets/{txt_file_name}",
-        bucket_name="alkemy-gh",
+        bucket_name="{{bucket_name}}",
         replace=True,
         key=f"process/{txt_file_name}",
     )
@@ -78,14 +81,14 @@ def load_data():
 
 
 with DAG(
-    "Universidad_Buenos_Aires_etl",
+    "{{dag_id}}",
     default_args={
-        "retries": 5,
-        "retry_delay": timedelta(minutes=5),
+        "retries": {{retries}},
+        "retry_delay": {{retry_delay}},
     },
-    description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
+    description="Realiza un ETL de los datos de la Universidad de {{universidad}}.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 11),
+    start_date={{start_date}},
     tags=["etl"],
 ) as dag:
 

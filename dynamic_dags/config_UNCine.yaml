@@ -1,0 +1,15 @@
+dag_id: 'GHUNCine_dynamic_dag_etl'
+db_conn_id: 'alkemy_db'
+s3_conn_id: 'aws_s3_bucket'
+bucket_name: 'alkemy-gh'
+
+schedule: hours=1
+retries: 5
+retry_delay: timedelta(minutes=5)
+start_date: datetime(2022, 11, 11)
+
+universidad: 'Cine'
+sql_file_name: 'GHUNCine.sql'
+csv_file_name: 'GHUNCine_select.csv'
+txt_file_name: 'GHUNCine_process.txt'
+logger_name: 'GHUNCine_dag_etl'

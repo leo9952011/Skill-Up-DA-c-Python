@@ -15,10 +15,13 @@ from plugins.GH_transform import transform_df
 
 
 BASE_DIR = Path(__file__).parent.parent
-sql_file_name = "GHUNBuenosAires.sql"
-csv_file_name = "GHUNBuenosAires_select.csv"
-txt_file_name = "GHUNBuenosAires_process.txt"
-logger_name = "GHUNBuenosAires_dag_etl"
+# agregar conn db y s3
+# agregar tiempos
+# agregar retry
+sql_file_name = "GHUNCine.sql"
+csv_file_name = "GHUNCine_select.csv"
+txt_file_name = "GHUNCine_process.txt"
+logger_name = "GHUNCine_dag_etl"
 
 
 def configure_logger():
@@ -38,7 +41,7 @@ def extract_data():
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
-    hook = PostgresHook(postgres_conn_id="{{db_conn_id}}")
+    hook = PostgresHook(postgres_conn_id="alkemy_db")
     df = hook.get_pandas_df(sql=query)
 
     file_path = BASE_DIR / f"files/{csv_file_name}"
@@ -66,7 +69,7 @@ def load_data():
     logger = configure_logger()
     logger.info("Start load task")
 
-    s3_hook = S3Hook(aws_conn_id="{{s3_conn_id}}")
+    s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
     s3_hook.load_file(
         BASE_DIR / f"datasets/{txt_file_name}",
         bucket_name="alkemy-gh",
@@ -78,12 +81,12 @@ def load_data():
 
 
 with DAG(
-    "Universidad_Buenos_Aires_etl",
+    "GHUNCine_dynamic_dag_etl",
     default_args={
         "retries": 5,
         "retry_delay": timedelta(minutes=5),
     },
-    description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
+    description="Realiza un ETL de los datos de la Universidad de Cine.",
     schedule=timedelta(hours=1),
     start_date=datetime(2022, 11, 11),
     tags=["etl"],

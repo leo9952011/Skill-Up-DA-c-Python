@@ -83,7 +83,7 @@ with DAG(
         "retries": 5,
         "retry_delay": timedelta(minutes=5),
     },
-    description="Realiza un ETL de los datos de la Universidad de Cine.",
+    description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
     schedule=timedelta(hours=1),
     start_date=datetime(2022, 11, 11),
     tags=["etl"],

@@ -236,6 +236,4 @@ licenses/LICENSES-ui.txt
 .astro
 airflow_settings.yaml
 
-# Docker settings for mount
-docker-compose.override.yml
 .devcontainer

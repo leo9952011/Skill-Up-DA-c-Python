@@ -9,7 +9,5 @@ retry_delay: timedelta(minutes=5)
 start_date: datetime(2022, 11, 11)
 
 universidad: 'Cine'
-sql_file_name: 'GHUNCine.sql'
-csv_file_name: 'GHUNCine_select.csv'
-txt_file_name: 'GHUNCine_process.txt'
-logger_name: 'GHUNCine_dag_etl'
+sigla: 'UN' # Ejemplo UN o FL
+grupo: 'H'

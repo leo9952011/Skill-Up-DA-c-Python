@@ -16,10 +16,16 @@ from plugins.GH_transform import transform_df
 
 BASE_DIR = Path(__file__).parent.parent
 
-sql_file_name = "GHUNBuenosAires.sql"
-csv_file_name = "GHUNBuenosAires_select.csv"
-txt_file_name = "GHUNBuenosAires_process.txt"
-logger_name = "GHUNBuenosAires_dag_etl"
+# se normaliza el nombre de la universidad
+university = "Buenos Aires".strip().replace(" ", "")
+
+# Para la convencion del nombre
+name = f"GHUN{university}"
+
+sql_file_name = f"{name}.sql"
+csv_file_name = f"{name}_select.csv"
+txt_file_name = f"{name}_process.txt"
+logger_name = f"{name}_dag_etl"
 
 
 def configure_logger():

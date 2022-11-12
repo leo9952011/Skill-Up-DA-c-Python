@@ -1,26 +1,27 @@
 import logging
+import logging.config
 from datetime import timedelta
 
 from airflow.utils.dates import days_ago
 from airflow.decorators import (dag, task)
 
 from plugins.mudule_Nz.extract import std_extract
+from plugins.mudule_Nz.transform import std_transform
 
-import pandas as pd
 from pathlib import Path
-
-moron_sql = r'/usr/local/airflow/include/GFUMoron.sql'
-moron_csv = r'/usr/local/airflow/include/GFUMoron.csv'
-
-
-import logging
-import logging.config
 def configure_logger():
             
     LOGGING_CONFIG = Path(__file__).parent.parent/"logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
     logger = logging.getLogger("GFUMoron_dag_etl")
     return logger
+
+
+moron_sql = r'/usr/local/airflow/include/GFUMoron.sql'
+moron_csv = r'/usr/local/airflow/include/GFUMoron.csv'
+moron_txt = r'/usr/local/airflow/include/GFUMoron.txt'
+
+pc_path = r'/usr/local/airflow/include/codigos_postales.csv'
 
 
 
@@ -47,20 +48,36 @@ def GFUMoron_dag_etl():
     @task()
     def transform(extract):
         logger = configure_logger()
+        
         if extract:
-            df = pd.read_csv(moron_csv,encoding="utf-8")
-            print(df.head())
- 
+            logger.info('preparing Transformation')
+            std_kwargs = {
+                'dfPath':moron_csv,
+                'dateBornSchema': "%d/%m/%Y",
+                'inscriptionDateSchema': "%d/%m/%Y",
+                'minAge': 17,
+                'maxAge': 82,
+                'pathPostalCode': pc_path,
+                'target_file': moron_txt
+            }
+            try:
+                std_transform(**std_kwargs)
+                logger.info('transformatrion completed')
+                logger.info('------------------------------------------------------')
+            except:
+                logger.critical('transformation failure')
+        return extract
+
     @task()
-    def load():
+    def load(prev_task):
+        print(prev_task)
         logger = configure_logger()
         logging.info('PandaslOAD')
         logging.info('PandaslOAD')
         logging.info('PandaslOAD')
         logging.info('PandaslOAD')
         
-    transform(extract())
-    load()
+    load(transform(extract()))
 
 GFUMoron_dag_etl = GFUMoron_dag_etl()
 

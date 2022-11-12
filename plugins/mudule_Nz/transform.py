@@ -16,7 +16,8 @@ def std_transform(
     pathPostalCode: PathLike = None,
     yyBornDate: bool = False,
     pCode: str = 'codigo_postal',
-    lCode:str = 'localidad',
+    lCode: str = 'localidad',
+    target_file: str = ''
     ):
     ############################load Dataframe############################################
     df = pd.read_csv(dfPath,encoding="utf-8")
@@ -75,6 +76,6 @@ def std_transform(
     
     df['gender'] = df['gender'].map(lambda x : 'female' if x == 'F' else 'male').astype("category") 
     
-    #save.txt pendiente
+    df.to_csv(target_file, header=True, index=None, sep='\t', mode='a')
     
     return df

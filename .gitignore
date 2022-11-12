@@ -1,6 +1,6 @@
 __pycache__
+logs/
 .git
 .env
 airflow_settings.yaml
 astro
-docker-compose.override.yml

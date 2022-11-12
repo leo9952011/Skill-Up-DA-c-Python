@@ -38,7 +38,7 @@ def extract_data():
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
-    hook = PostgresHook(postgres_conn_id="{{db_conn_id}}")
+    hook = PostgresHook(postgres_conn_id="alkemy_db")
     df = hook.get_pandas_df(sql=query)
 
     file_path = BASE_DIR / f"files/{csv_file_name}"
@@ -66,7 +66,7 @@ def load_data():
     logger = configure_logger()
     logger.info("Start load task")
 
-    s3_hook = S3Hook(aws_conn_id="{{s3_conn_id}}")
+    s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
     s3_hook.load_file(
         BASE_DIR / f"datasets/{txt_file_name}",
         bucket_name="alkemy-gh",

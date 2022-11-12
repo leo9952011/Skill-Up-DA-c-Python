@@ -15,9 +15,7 @@ from plugins.GH_transform import transform_df
 
 
 BASE_DIR = Path(__file__).parent.parent
-# agregar conn db y s3
-# agregar tiempos
-# agregar retry
+
 sql_file_name = "GHUNBuenosAires.sql"
 csv_file_name = "GHUNBuenosAires_select.csv"
 txt_file_name = "GHUNBuenosAires_process.txt"

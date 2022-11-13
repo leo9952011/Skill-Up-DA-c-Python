@@ -3,3 +3,4 @@ services:
   scheduler:
     volumes:
       - ./files:/usr/local/airflow/files:rw
+      - ./dags/logs:/usr/local/airflow/mylogs:rw

@@ -9,6 +9,8 @@ from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
+from plugins.GGtransform import transform_dataset
+
 
 def configure_logger():
     """Configure logging from cfg file. Return custom logger."""
@@ -48,7 +50,11 @@ def transform_task():
     logger = configure_logger()
     logger.info('Started Transform Task for DAG GFUKennedy.')
 
-    print(f'Transform all data task placeholder..')
+    local_basepath = Path(__file__).resolve().parent.parent
+
+    csv_path = local_basepath / 'files/GGUKennedy_select.csv'
+    txt_path = local_basepath / 'datasets/GGUKennedy_process.txt'
+    transform_dataset(input_path=csv_path, output_path=txt_path)
 
     logger.info('Finished Transform Task for DAG GFUKennedy.')
 

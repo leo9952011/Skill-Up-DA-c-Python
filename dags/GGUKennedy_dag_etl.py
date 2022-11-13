@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+import logging
 
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
@@ -9,8 +10,19 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
+def configure_logger():
+    """Configure logging from cfg file. Return custom logger."""
+    LOGGING_CONFIG = Path(__file__).parent.parent / 'logger.cfg'
+    logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
+    logger = logging.getLogger('GGUKennedy_dag_etl')
+    return logger
+
+
 def extract_task():
     """Get UKennedy data from remote postgres DB and save to csv file locally."""
+
+    logger = configure_logger()
+    logger.info('Started Extract Task for DAG GFUKennedy.')
 
     local_basepath = Path(__file__).resolve().parent.parent
 
@@ -27,11 +39,18 @@ def extract_task():
     csv_filepath = local_basepath / 'files/GGUKennedy_select.csv'
     uni_df.to_csv(csv_filepath, sep=',', header=True, encoding='utf-8')
 
+    logger.info('Finished Extract Task for DAG GFUKennedy.')
+
 
 def transform_task():
     """Load data from local csv, normalize with pandas and save to txt file locally."""
 
+    logger = configure_logger()
+    logger.info('Started Transform Task for DAG GFUKennedy.')
+
     print(f'Transform all data task placeholder..')
+
+    logger.info('Finished Transform Task for DAG GFUKennedy.')
 
 
 with DAG('GGUKennedy_dag_etl',
@@ -54,4 +73,4 @@ with DAG('GGUKennedy_dag_etl',
                     retries=5)
 
     # set task dependencies
-    transform >> extract >> load
+    extract >> transform >> load

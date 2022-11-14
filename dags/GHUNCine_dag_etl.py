@@ -15,10 +15,17 @@ from plugins.GH_transform import transform_df
 
 
 BASE_DIR = Path(__file__).parent.parent
-sql_file_name = "GHUNCine.sql"
-csv_file_name = "GHUNCine_select.csv"
-txt_file_name = "GHUNCine_process.txt"
-logger_name = "GHUNCine_dag_etl"
+
+# se normaliza el nombre de la universidad
+university = "Cine".strip().replace(" ", "")
+
+# Para la convencion del nombre
+name = f"GHUN{university}"
+
+sql_file_name = f"{name}.sql"
+csv_file_name = f"{name}_select.csv"
+txt_file_name = f"{name}_process.txt"
+logger_name = f"{name}_dag_etl"
 
 
 def configure_logger():
@@ -68,7 +75,7 @@ def load_data():
 
     s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
     s3_hook.load_file(
-        BASE_DIR / "datasets/GHUNBuenosAires_process.txt",
+        BASE_DIR / f"datasets/{txt_file_name}",
         bucket_name="alkemy-gh",
         replace=True,
         key=f"process/{txt_file_name}",
@@ -78,12 +85,12 @@ def load_data():
 
 
 with DAG(
-    "Universidad_Cine_etl",
+    "GHUNCine_dag_etl",
     default_args={
         "retries": 5,
         "retry_delay": timedelta(minutes=5),
     },
-    description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
+    description="Realiza un ETL de los datos de la Universidad de Cine.",
     schedule=timedelta(hours=1),
     start_date=datetime(2022, 11, 11),
     catchup=False,

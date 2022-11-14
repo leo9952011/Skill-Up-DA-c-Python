@@ -86,6 +86,7 @@ with DAG(
     description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
     schedule=timedelta(hours=1),
     start_date=datetime(2022, 11, 11),
+    catchup=False,
     tags=["etl"],
 ) as dag:
 

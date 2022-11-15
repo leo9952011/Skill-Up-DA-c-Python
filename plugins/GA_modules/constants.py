@@ -9,7 +9,7 @@ INCLUDE_DIR = os.path.join(WORKING_DIR, 'include')
 LOGS_DIR = os.path.join(WORKING_DIR, 'mylogs')
 
 LOGGER_CFG_PATH = os.path.join(WORKING_DIR, 'logger.cfg')
-POSTAL_CODES_PATH = os.path.join(WORKING_DIR, 'assets', 'codigos_postales.csv')
+POSTAL_DATA_PATH = os.path.join(WORKING_DIR, 'assets', 'codigos_postales.csv')
 
 POSTGRES_CONN_ID = 'alkemy_db'
 S3_CONN_ID = 'astro-s3-workshop'

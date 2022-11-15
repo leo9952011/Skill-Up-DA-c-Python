@@ -21,5 +21,5 @@ for grupo in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]:
 
                 config = yaml.safe_load(config_file)
 
-                with open(f"dags/{config['dag_id']}.py", "w") as f:
+                with open(f"dags/{config['dag_id']}_dag_etl.py", "w") as f:
                     f.write(template.render(config))

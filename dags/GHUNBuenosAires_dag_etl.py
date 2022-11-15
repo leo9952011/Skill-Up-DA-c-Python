@@ -85,7 +85,7 @@ def load_data():
 
 
 with DAG(
-    "GHUNBuenosAires_dag_etl",
+    "GHUNBuenosAires",
     default_args={
         "retries": 5,
         "retry_delay": timedelta(minutes=5),

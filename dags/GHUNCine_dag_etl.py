@@ -85,7 +85,7 @@ def load_data():
 
 
 with DAG(
-    "GHUNCine_dag_etl",
+    "GHUNCine",
     default_args={
         "retries": 5,
         "retry_delay": timedelta(minutes=5),

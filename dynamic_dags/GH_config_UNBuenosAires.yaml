@@ -1,4 +1,4 @@
-dag_id: 'GHUNBuenosAires_dag_etl'
+dag_id: 'GHUNBuenosAires'
 
 db_conn_id: 'alkemy_db'
 s3_conn_id: 'aws_s3_bucket'

@@ -4,12 +4,14 @@ import os
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
 
+print(file_dir)
+
 # LISTA DE GRUPOS
 for grupo in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]:
 
     env = Environment(loader=FileSystemLoader(file_dir))
     try:
-        template = env.get_template(f"G{grupo}_template_dag.jinga2")
+        template = env.get_template(f"G{grupo}_template_dag.jinja2")
     except:
         print(f"No existe un template para el grupo: {grupo}")
 

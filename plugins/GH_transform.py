@@ -5,10 +5,7 @@ import pandas as pd
 
 def str_normalizer(text):
     """Elimina espacios de más, reemplaza los - por " " y cambia el texto a minuscula."""
-    text = text.replace("-", " ")
-    text = text.lower()
-    text = text.strip()
-
+    text = text.replace("-", " ").lower().strip()
     return text
 
 

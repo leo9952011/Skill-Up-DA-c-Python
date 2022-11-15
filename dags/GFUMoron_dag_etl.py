@@ -7,6 +7,7 @@ from airflow.decorators import (dag, task)
 
 from plugins.mudule_Nz.extract import std_extract
 from plugins.mudule_Nz.transform import std_transform
+from plugins.mudule_Nz.updateS3 import upload_to_s3
 
 from pathlib import Path
 def configure_logger():
@@ -20,9 +21,7 @@ def configure_logger():
 moron_sql = r'/usr/local/airflow/include/GFUMoron.sql'
 moron_csv = r'/usr/local/airflow/include/GFUMoron.csv'
 moron_txt = r'/usr/local/airflow/include/GFUMoron.txt'
-
 pc_path = r'/usr/local/airflow/include/codigos_postales.csv'
-
 
 
 
@@ -70,12 +69,13 @@ def GFUMoron_dag_etl():
 
     @task()
     def load(prev_task):
-        print(prev_task)
         logger = configure_logger()
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
+        print(prev_task)
+        
+        upload_to_s3(moron_txt,'moron')
+        
+        
+        
         
     load(transform(extract()))
 

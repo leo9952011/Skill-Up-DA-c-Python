@@ -1,8 +1,10 @@
 import pandas as pd
 from datetime import datetime
-from plugins.transform_data import transform_jujuy
+from plugins.transform_data import transform_Jujuy
 from pathlib import Path
+
 import logging
+import logging.config
 
 from airflow.decorators import dag, task 
 from airflow.operators.dummy import DummyOperator
@@ -10,66 +12,79 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-CUR_DIR = Path(__file__).resolve().parent
-PAR_DIR = CUR_DIR.parent
 
-sqlpath= PAR_DIR/'include/GCUNjujuy.sql'
-csvpath= PAR_DIR/'files'
+BASE_DIR = Path(__file__).parent.parent
+
+# se normaliza el nombre de la universidad
+university = "Jujuy".strip().replace(" ", "")
+
+# Para la convencion del nombre
+name = f"GCUN{university}"
+
+sql_file_name = f"{name}.sql"
+csv_file_name = f"{name}_select.csv"
+txt_file_name = f"{name}_process.txt"
+logger_name = f"{name}_dag_etl"
+
 
 def configure_logger():
     LOG_CONF = PAR_DIR / 'logger.cfg'
     logging.config.fileConfig(LOG_CONF, disable_existing_loggers=False)
-    logger = logging.getLogger('GCUJujuy_dag_etl')
+    logger = logging.getLogger(logger_name)
     return logger
 
 def transform_fun():
     logger = configure_logger()
-    logger.info('Comienza tarea de transformaci贸n en el DAG jujuy_dag')
+    logger.info('Comienza tarea de transformaci髇 en el DAG')
 
-    input_path = PAR_DIR/'files'
-    output_path = PAR_DIR/'datasets'
-    transform_jujuy(input_path, output_path)
+    input_path = BASE_DIR / f"files/{csv_file_name}"
+    output_path = BASE_DIR / f"datasets/{txt_file_name}"
+    transform_Jujuy(input_path, output_path)
 
-    logger.info('Finaliza tarea de transformaci贸n en el DAG jujuy_dag')
+    logger.info('Finaliza tarea de transformaci髇 en el DAG')
 
 @dag(
-    'jujuy_dag',
-    description = 'Dag para ETL de la Universidad Nacional de Jujuy',
-    schedule_interval = "@hourly",
-    start_date = datetime(2022, 11, 4)
+    "GCUNJujuy",
+    default_args={
+        "retries": 5,
+        "retry_delay": timedelta(minutes=5),
+    },
+    description="Realiza un ETL de los datos de la Universidad de Jujuy.",
+    schedule=timedelta(hours=1),
+    start_date=datetime(2022, 11, 11)
 )
-def jujuy_dag():
-    @task(task_id='extract_jujuy', retries = 5)
-    def get_data_jujuy(**kwargs):
+def gcdag():
+    @task(task_id='extract', retries = 5)
 
+    def get_data(**kwargs):
         logger = configure_logger()
-        logger.info('Comienza tarea de extracci贸n en el DAG jujuy_dag')
+        logger.info('Comienza tarea de extracci髇 en el DAG')
+        sqlpath = BASE_DIR / f"include/{sql_file_name}"
         with open(sqlpath, 'r') as sqlfile:
             select_query = sqlfile.read()
-        hook = PostgresHook(postgres_conn_id='alkemy_db')
+        hook = PostgresHook(postgres_conn_id="alkemy_db")
         df = hook.get_pandas_df(sql=select_query)
-        df.to_csv(csvpath/'GCUNjujuy_select.csv')
+        csvpath = BASE_DIR / f"files/{csv_file_name}"
+        df.to_csv(csvpath)
 
-        logger.info('Finaliza tarea de extracci贸n en el DAG jujuy_dag')
+        logger.info('Finaliza tarea de extracci髇 en el DAG')
     
     transform = PythonOperator(task_id='transform_fun', retries = 5, python_callable=transform_fun)
 
-    @task(task_id='load_jujuy', retries=5)
-    def load_data_jujuy(**kwargs):
-
+    @task(task_id='load', retries=5)
+    def load_data(**kwargs):
         logger = configure_logger()
-        logger.info('Comienza tarea de subida en el DAG jujuy_dag')
+        logger.info('Comienza tarea de subida en el DAG')
 
         s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
         s3_hook.load_file(
-            PAR_DIR/'datasets/GCUNjujuy_process.txt',
-            bucket_name='alkemy-gc',
+            BASE_DIR / f"datasets/{txt_file_name}",
+            bucket_name=alkemy-gc,
             replace=True,
-            key="process/GCUNjujuy_process.txt"
+            key=f"process/{txt_file_name}"
             )
-        logger.info('Finaliza tarea de subida en el DAG jujuy_dag')
+        logger.info('Finaliza tarea de subida en el DAG')
 
+    get_data() >> transform >> load_data()
 
-    get_data_jujuy() >> transform >> load_data_jujuy()
-
-dag = jujuy_dag()
+dag = gcdag()

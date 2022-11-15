@@ -1,20 +1,25 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+import logging
 import os
 
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
-import pandas as pd
 
-from plugins.GA_modules.constants import FILES_DIR, INCLUDE_DIR
+from plugins.GA_modules.constants import FILES_DIR, INCLUDE_DIR, \
+    LOGGER_CFG_PATH
 from plugins.GA_modules.ETL_funcs import extract_func
-
 
 
 # Constants
 UNIVERSITY_ID = 'GAUFlores'
 SQL_PATH = os.path.join(INCLUDE_DIR, f'{UNIVERSITY_ID}.sql')
 CSV_PATH = os.path.join(FILES_DIR, f'{UNIVERSITY_ID}_select.csv')
+
+
+logging_config = LOGGER_CFG_PATH
+logging.config.fileConfig(logging_config, disable_existing_loggers=False)
+logger = logging.getLogger(UNIVERSITY_ID)
 
 
 with DAG(
@@ -31,8 +36,10 @@ with DAG(
             'university_id': UNIVERSITY_ID,
             'sql_path': SQL_PATH,
             'csv_path': CSV_PATH,
+            'logger': logger
         },
-        retries=5
+        retries=5,
+        provide_context=True
     )
 
     # Apply requested formats for each column, add location or postal

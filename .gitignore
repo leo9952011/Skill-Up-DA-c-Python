@@ -3,3 +3,4 @@ __pycache__
 .env
 airflow_settings.yaml
 astro
+dags/logs

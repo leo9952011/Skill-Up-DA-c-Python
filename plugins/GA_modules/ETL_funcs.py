@@ -1,13 +1,18 @@
+import logging
+
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from plugins.GA_modules.constants import POSTGRES_CONN_ID
+from plugins.GA_modules.constants import LOGGER_CFG_PATH, POSTGRES_CONN_ID
+from plugins.GA_modules.logger import logger_func
+
 
 
 def extract_func(
     university_id,
     sql_path,
     csv_path,
-    db_conn_id=POSTGRES_CONN_ID
+    logger,
+    db_conn_id=POSTGRES_CONN_ID,
 ):
     """Read query statement from .sql file in INCLUDE_DIR, get data from
     postgres db and save it as .csv in FILES_DIR
@@ -41,3 +46,7 @@ def extract_func(
     pg_hook = PostgresHook.get_hook(db_conn_id)
     df = pg_hook.get_pandas_df(command)
     df.to_csv(csv_path, index=False)
+
+    logger.info(
+        f'Extraction done: read {university_id}.sql in INCLUDE_DIR and '
+        f'created {university_id}_select.csv in FILES_DIR')

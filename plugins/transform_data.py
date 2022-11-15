@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 
-def transform_palermo(csvpath, txtpath):
+def transform_Palermo(csvpath, txtpath):
 
     CUR_DIR = Path(__file__).resolve().parent
     PAR_DIR = CUR_DIR.parent
@@ -79,7 +79,7 @@ def transform_palermo(csvpath, txtpath):
     df_palermo.to_csv (txtpath/'GCUpalermo_process.txt')
     return df_palermo
 
-def transform_jujuy(csvpath, txtpath):
+def transform_Jujuy(csvpath, txtpath):
 
     CUR_DIR = Path(__file__).resolve().parent
     PAR_DIR = CUR_DIR.parent

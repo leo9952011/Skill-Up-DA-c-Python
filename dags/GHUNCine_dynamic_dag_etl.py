@@ -1,111 +1,101 @@
-from datetime import datetime, timedelta
+"""ETL DAG for 'Facultad Latinoamericana de Ciencias Sociales' (Grupo G)."""
+
+from datetime import datetime
 from pathlib import Path
+import logging
 
 from airflow import DAG
-
-from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-import logging
-import logging.config
-
-from plugins.GH_transform import transform_df
-
-
-BASE_DIR = Path(__file__).parent.parent
-
-# se normaliza el nombre de la universidad
-university = "Cine".strip().replace(" ", "")
-
-# Para la convencion del nombre
-name = f"GHUN{university}"
-
-sql_file_name = f"{name}.sql"
-csv_file_name = f"{name}_select.csv"
-txt_file_name = f"{name}_process.txt"
-logger_name = f"{name}_dag_etl"
+from plugins.GGtransform import transform_dataset
 
 
 def configure_logger():
-    LOGGING_CONFIG = BASE_DIR / "logger.cfg"
+    """Configure logging from cfg file. Return custom logger."""
+    LOGGING_CONFIG = Path(__file__).parent.parent / 'logger.cfg'
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger(logger_name)
+    logger = logging.getLogger(f'{dag_id}_dag_etl')
     return logger
 
 
-def extract_data():
+def extract_task():
+    """Get data from remote postgres DB and save to csv file locally."""
 
     logger = configure_logger()
-    logger.info("Start of extraction task")
+    logger.info(f'Started Extract Task for DAG {dag_id}.')
 
-    # Consulta sql.
-    sql_path = BASE_DIR / f"include/{sql_file_name}"
-    query = open(sql_path).read()
+    local_basepath = Path(__file__).resolve().parent.parent
 
-    # PostgresHook --> DataFrame
-    hook = PostgresHook(postgres_conn_id="alkemy_db")
-    df = hook.get_pandas_df(sql=query)
+    # Read SQL query
+    sql_filepath = local_basepath / 'include/GHUNCine_dynamic_dag_etl.sql'
+    with open(sql_filepath, encoding='utf8') as sql_file:
+        sql_str = sql_file.read()
 
-    file_path = BASE_DIR / f"files/{csv_file_name}"
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+    # connect to remote postgres DB via hook
+    pg_hook = PostgresHook(postgres_conn_id="alkemy_db")
+    uni_df = pg_hook.get_pandas_df(sql=sql_str)
 
-    logger.info("Done...")
+    # save df data to csv locally
+    csv_filepath = local_basepath / 'files/GHUNCine_dynamic_dag_etl_select.csv'
+    uni_df.to_csv(csv_filepath, sep=',', header=True, encoding='utf-8')
 
-    return df.to_csv(file_path, header=True, index=False)
+    logger.info('Finished Extract Task for DAG {dag_id}.')
 
 
-def transform_data():
+def transform_task():
+    """Load data from local csv, normalize with pandas and save to txt file locally."""
+    
+    logger = configure_logger()
+    logger.info(f'Started Transform Task for DAG {dag_id}.')
+
+    local_basepath = Path(__file__).resolve().parent.parent
+
+    csv_path = local_basepath / 'files/GHUNCine_dynamic_dag_etl_select.csv'
+    txt_path = local_basepath / 'datasets/GHUNCine_dynamic_dag_etl_process.txt'
+    transform_dataset(input_path=csv_path, output_path=txt_path, date_format='')
+
+    logger.info('Finished Transform Task for DAG {dag_id}.')
+
+def load_task():
+    """Take txt file and upload it to s3 bucket."""
 
     logger = configure_logger()
-    logger.info("Start of transform task")
+    logger.info(f'Started Load Task for DAG {dag_id}.')
+    
+    s3_hook = S3Hook(aws_conn_id='aws_s3_bucket')
+    bucket_name = 'alkemy-gg'
+    local_basepath = Path(__file__).resolve().parent.parent
 
-    df_path = BASE_DIR / f"files/{csv_file_name}"
-    output_path = BASE_DIR / f"datasets/{txt_file_name}"
+    # Upload to S3 using predefined method
+    txt_path = local_basepath / f'datasets/{dag_id}_process.txt'
+    s3_hook.load_file(txt_path,
+                        bucket_name=bucket_name,
+                        replace=True,
+                        key='process/{dag_id}_process.txt')
 
-    transform_df(df_path, output_path)
-
-    logger.info("Done...")
-
-
-def load_data():
-    logger = configure_logger()
-    logger.info("Start load task")
-
-    s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
-    s3_hook.load_file(
-        BASE_DIR / f"datasets/{txt_file_name}",
-        bucket_name="alkemy-gh",
-        replace=True,
-        key=f"process/{txt_file_name}",
-    )
-
-    logger.info("Done...")
+    logger.info('Finished Load Task for DAG {dag_id}.')
 
 
-with DAG(
-    "GHUNCine_dynamic_dag_etl",
-    default_args={
-        "retries": 5,
-        "retry_delay": timedelta(minutes=5),
-    },
-    description="Realiza un ETL de los datos de la Universidad de Cine.",
-    schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 11),
-    tags=["etl"],
-) as dag:
+with DAG('AUTO_GHUNCine_dynamic_dag_etl_dag_etl',
+        start_date=datetime(2022,11,1),
+        catchup=False,
+        schedule_interval='',
+        ) as dag:
 
-    # Utilizar postgres_hook
-    # https://airflow.apache.org/docs/apache-airflow/1.10.6/_api/airflow/hooks/postgres_hook/index.html
-    extract = PythonOperator(task_id="Extract", python_callable=extract_data)
+    extract = PythonOperator(task_id='extract',
+                             python_callable=extract_task,
+                             retries=5)
 
-    # Utilizar PythonOperator
-    # Se debe realizar una funcion que levante los csv obtenidos del proceso de extracción y los transforme acorde a las necesidades.
-    transform = PythonOperator(task_id="Transform", python_callable=transform_data)
+    transform = PythonOperator(task_id='transform',
+                             python_callable=transform_task,
+                             retries=5)
 
-    # Utilizar Providers de Amazon para la carga de datos.
-    # https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html
-    load = PythonOperator(task_id="load", python_callable=load_data)
+    load = PythonOperator(task_id='load',
+                             python_callable=load_task,
+                             retries=5)
 
+    # set task dependencies
     extract >> transform >> load

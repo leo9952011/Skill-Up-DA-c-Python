@@ -418,3 +418,8 @@ def transform_func(csv_path, txt_path, **kwargs):
         df.insert(col_loc, kwargs['fill'], df.pop(kwargs["fill"]))
 
     df.to_csv(txt_path, index=False)
+
+    logger.info(
+        f'Transformation done: read {university_id}_select.csv in FILES_DIR, '
+        f'processed it and created {university_id}_process.txt in DATASETS_DIR'
+    )

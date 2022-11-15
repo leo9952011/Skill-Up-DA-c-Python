@@ -1,7 +1,6 @@
 """Transformation function for the universities of group G."""
 
 
-from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -11,7 +10,7 @@ import pandas as pd
 def calculate_age(row):
     """Calculate age based on birth_date. If age is lower than 15, set to null."""
 
-    age = datetime.today().year - row['birth_date'].year
+    age = row['inscription_date'].year - row['birth_date'].year
     row['age'] = np.nan if age < 15 else age
     return row
 

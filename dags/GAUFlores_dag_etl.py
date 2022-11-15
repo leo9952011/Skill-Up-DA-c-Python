@@ -38,8 +38,7 @@ with DAG(
             'csv_path': CSV_PATH,
             'logger': logger
         },
-        retries=5,
-        provide_context=True
+        retries=5
     )
 
     # Apply requested formats for each column, add location or postal

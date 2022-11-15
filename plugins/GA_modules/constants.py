@@ -12,5 +12,5 @@ LOGGER_CFG_PATH = os.path.join(WORKING_DIR, 'logger.cfg')
 POSTAL_DATA_PATH = os.path.join(WORKING_DIR, 'assets', 'codigos_postales.csv')
 
 POSTGRES_CONN_ID = 'alkemy_db'
-S3_CONN_ID = 'astro-s3-workshop'
-S3_BUCKET = 'astro-workshop-bucket'
+S3_CONN_ID = 'aws_s3_bucket'
+S3_BUCKET = 'alkemy-ga'

@@ -8,7 +8,8 @@ from airflow.operators.python import PythonOperator
 
 from plugins.GA_modules.constants import DATASETS_DIR, FILES_DIR, INCLUDE_DIR,\
     LOGGER_CFG_PATH, POSTAL_DATA_PATH
-from plugins.GA_modules.ETL_funcs import extract_func, transform_func
+from plugins.GA_modules.ETL_funcs import extract_func, transform_func, \
+    load_func
 
 
 # Constants
@@ -27,7 +28,7 @@ with DAG(
     dag_id=f'{UNIVERSITY_ID}_dag_etl',
     description=f'ETL process for {UNIVERSITY_ID}',
     schedule_interval='@hourly',
-    start_date=datetime(2022, 11, 15)
+    start_date=datetime(2022, 11, 15, 6)
 ) as dag:
     # Read .sql in INCLUDE_DIR, save data as .csv in FILES_DIR
     extract = PythonOperator(
@@ -51,8 +52,10 @@ with DAG(
         retries=5,
         python_callable=transform_func,
         op_kwargs={
+            'university_id': UNIVERSITY_ID,
             'csv_path': CSV_PATH,
             'txt_path': TXT_PATH,
+            'logger': logger,
             'to_lower': ['university', 'career', 'last_name', 'email'],
             'gender': {'M': 'male', 'F': 'female'},
             'date_format': '%Y-%m-%d',
@@ -62,7 +65,16 @@ with DAG(
         }
     )
 
-    # Load .txt from DATASETS_DIR, upload to S3.  Use PythonOperator.
-    load = EmptyOperator(task_id='load_func')
+    # Load .txt from DATASETS_DIR, upload to S3
+    load = PythonOperator(
+        task_id='load_func',
+        retries=5,
+        python_callable=load_func,
+        op_kwargs={
+            'university_id': UNIVERSITY_ID,
+            'txt_path': TXT_PATH,
+            'logger': logger
+        }
+    )
 
     extract >> transform >> load

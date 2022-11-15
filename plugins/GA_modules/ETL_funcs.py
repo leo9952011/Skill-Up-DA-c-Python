@@ -1,10 +1,12 @@
 import logging
 
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 import numpy as np
 import pandas as pd
 
-from plugins.GA_modules.constants import POSTGRES_CONN_ID
+from plugins.GA_modules.constants import POSTGRES_CONN_ID, S3_BUCKET, \
+    S3_CONN_ID
 
 
 def extract_func(
@@ -52,7 +54,7 @@ def extract_func(
         f'created {university_id}_select.csv in FILES_DIR')
 
 
-def transform_func(csv_path, txt_path, **kwargs):
+def transform_func(university_id, csv_path, txt_path, logger, **kwargs):
     """Perform several transformations over the original data.  The de-
     cription of the arguments is enough to see its functionality, but
     the age computation requires some criteria specification.  The func-
@@ -422,4 +424,46 @@ def transform_func(csv_path, txt_path, **kwargs):
     logger.info(
         f'Transformation done: read {university_id}_select.csv in FILES_DIR, '
         f'processed it and created {university_id}_process.txt in DATASETS_DIR'
+    )
+
+def load_func(
+    university_id,
+    txt_path,
+    logger,
+    s3_conn_id=S3_CONN_ID,
+    s3_bucket=S3_BUCKET
+):
+    """Read data from .txt file in FILES_DIR and upload it to S3.
+
+    Parameters
+    ----------
+    university_id: string
+        Unique per-university identifier to set names of files, custom-
+        ize logging information, etc.  Default is local constant UNIVERS
+        ITY_ID.
+    txt_path: string or path object
+        System path with location and name of the .txt file to be creat-
+        ed.  Default is local constant TXT_PATH.
+    s3_conn_id: string
+        S3 connection id as configured in Airflow UI (Admin -> Connect-
+        ions).  Default is plugins.constants.S3_CONN_ID.
+    s3_bucket: string
+        Name of the S3 bucket to upload to.  Default is plugins.constant
+        s.S3_BUCKET.
+
+    Returns
+    -------
+    None.
+    """
+
+    s3_hook = S3Hook(s3_conn_id)
+    s3_hook.load_file(
+        txt_path,
+        key=f'{university_id}_process.txt',
+        bucket_name=s3_bucket,
+        replace=True)
+
+    logger.info(
+        f'Load done: read {university_id}_process.txt in FILES_DIR and '
+        f'uploaded it to S3'
     )

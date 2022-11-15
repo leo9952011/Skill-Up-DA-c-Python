@@ -67,3 +67,9 @@
 '2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Finished Transform Task for DAG GGFLCienciasSociales.
 '2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Started Load Task for DAG GGFLCienciasSociales.
 '2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Finished Load Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Started Extract Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Finished Extract Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Started Transform Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Finished Transform Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Started Load Task for DAG GGFLCienciasSociales.
+'2022-11-15' - GGFLCienciasSociales_dag_etl - INFO - Finished Load Task for DAG GGFLCienciasSociales.

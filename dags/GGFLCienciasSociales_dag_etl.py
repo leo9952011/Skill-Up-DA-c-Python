@@ -17,7 +17,7 @@ def configure_logger():
     """Configure logging from cfg file. Return custom logger."""
     LOGGING_CONFIG = Path(__file__).parent.parent / 'logger.cfg'
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger(f'{dag_id}_dag_etl')
+    logger = logging.getLogger('GGFLCienciasSociales_dag_etl')
     return logger
 
 
@@ -25,7 +25,7 @@ def extract_task():
     """Get data from remote postgres DB and save to csv file locally."""
 
     logger = configure_logger()
-    logger.info(f'Started Extract Task for DAG {dag_id}.')
+    logger.info('Started Extract Task for DAG GGFLCienciasSociales.')
 
     local_basepath = Path(__file__).resolve().parent.parent
 
@@ -42,44 +42,44 @@ def extract_task():
     csv_filepath = local_basepath / 'files/GGFLCienciasSociales_select.csv'
     uni_df.to_csv(csv_filepath, sep=',', header=True, encoding='utf-8')
 
-    logger.info('Finished Extract Task for DAG {dag_id}.')
+    logger.info('Finished Extract Task for DAG GGFLCienciasSociales.')
 
 
 def transform_task():
     """Load data from local csv, normalize with pandas and save to txt file locally."""
     
     logger = configure_logger()
-    logger.info(f'Started Transform Task for DAG {dag_id}.')
+    logger.info(f'Started Transform Task for DAG GGFLCienciasSociales.')
 
     local_basepath = Path(__file__).resolve().parent.parent
 
     csv_path = local_basepath / 'files/GGFLCienciasSociales_select.csv'
     txt_path = local_basepath / 'datasets/GGFLCienciasSociales_process.txt'
-    transform_dataset(input_path=csv_path, output_path=txt_path, date_format='')
+    transform_dataset(input_path=csv_path, output_path=txt_path)
 
-    logger.info('Finished Transform Task for DAG {dag_id}.')
+    logger.info('Finished Transform Task for DAG GGFLCienciasSociales.')
 
 def load_task():
     """Take txt file and upload it to s3 bucket."""
 
     logger = configure_logger()
-    logger.info(f'Started Load Task for DAG {dag_id}.')
+    logger.info('Started Load Task for DAG GGFLCienciasSociales.')
     
     s3_hook = S3Hook(aws_conn_id='aws_s3_bucket')
     bucket_name = 'alkemy-gg'
     local_basepath = Path(__file__).resolve().parent.parent
 
     # Upload to S3 using predefined method
-    txt_path = local_basepath / f'datasets/{dag_id}_process.txt'
+    txt_path = local_basepath / 'datasets/GGFLCienciasSociales_process.txt'
     s3_hook.load_file(txt_path,
                         bucket_name=bucket_name,
                         replace=True,
-                        key='process/{dag_id}_process.txt')
+                        key='process/GGFLCienciasSociales_process.txt')
 
-    logger.info('Finished Load Task for DAG {dag_id}.')
+    logger.info('Finished Load Task for DAG GGFLCienciasSociales.')
 
 
-with DAG('AUTO_GGFLCienciasSociales_dag_etl',
+with DAG('GGFLCienciasSociales_dag_etl',
         start_date=datetime(2022,11,1),
         catchup=False,
         schedule_interval='@hourly',

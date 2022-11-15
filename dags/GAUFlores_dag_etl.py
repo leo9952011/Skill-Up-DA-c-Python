@@ -28,7 +28,7 @@ with DAG(
     dag_id=f'{UNIVERSITY_ID}_dag_etl',
     description=f'ETL process for {UNIVERSITY_ID}',
     schedule_interval='@hourly',
-    start_date=datetime(2022, 11, 15, 6)
+    start_date=datetime(2022, 11, 15, 13)
 ) as dag:
     # Read .sql in INCLUDE_DIR, save data as .csv in FILES_DIR
     extract = PythonOperator(
@@ -51,18 +51,14 @@ with DAG(
         task_id='transform_func',
         retries=5,
         python_callable=transform_func,
-        op_kwargs={
+        op_kwargs=dict({
             'university_id': UNIVERSITY_ID,
             'csv_path': CSV_PATH,
             'txt_path': TXT_PATH,
             'logger': logger,
-            'to_lower': ['university', 'career', 'last_name', 'email'],
-            'gender': {'M': 'male', 'F': 'female'},
-            'date_format': '%Y-%m-%d',
-            'min_age': 15,
-            'postal_data_path': POSTAL_DATA_PATH,
-            'fill': 'location'
-        }
+            'postal_data_path': POSTAL_DATA_PATH
+        },
+        **{'to_lower': ['university', 'career', 'last_name', 'email'], 'gender': {'M': 'male', 'F': 'female'}, 'date_format': '%Y-%m-%d', 'min_age': 15, 'fill': 'location'})
     )
 
     # Load .txt from DATASETS_DIR, upload to S3

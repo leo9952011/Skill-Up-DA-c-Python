@@ -1,4 +1,4 @@
-"""ETL DAG for 'Universidad Kennedy' (Grupo G)."""
+"""ETL DAG for 'Facultad Latinoamericana de Ciencias Sociales' (Grupo G)."""
 
 from datetime import datetime
 from pathlib import Path
@@ -8,6 +8,7 @@ from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 from plugins.GGtransform import transform_dataset
 
@@ -21,10 +22,10 @@ def configure_logger():
 
 
 def extract_task():
-    """Get UKennedy data from remote postgres DB and save to csv file locally."""
+    """Get data from remote postgres DB and save to csv file locally."""
 
     logger = configure_logger()
-    logger.info('Started Extract Task for DAG GFUKennedy.')
+    logger.info('Started Extract Task for DAG GGUKennedy.')
 
     local_basepath = Path(__file__).resolve().parent.parent
 
@@ -41,14 +42,14 @@ def extract_task():
     csv_filepath = local_basepath / 'files/GGUKennedy_select.csv'
     uni_df.to_csv(csv_filepath, sep=',', header=True, encoding='utf-8')
 
-    logger.info('Finished Extract Task for DAG GFUKennedy.')
+    logger.info('Finished Extract Task for DAG GGUKennedy.')
 
 
 def transform_task():
     """Load data from local csv, normalize with pandas and save to txt file locally."""
-
+    
     logger = configure_logger()
-    logger.info('Started Transform Task for DAG GFUKennedy.')
+    logger.info(f'Started Transform Task for DAG GGUKennedy.')
 
     local_basepath = Path(__file__).resolve().parent.parent
 
@@ -56,7 +57,26 @@ def transform_task():
     txt_path = local_basepath / 'datasets/GGUKennedy_process.txt'
     transform_dataset(input_path=csv_path, output_path=txt_path)
 
-    logger.info('Finished Transform Task for DAG GFUKennedy.')
+    logger.info('Finished Transform Task for DAG GGUKennedy.')
+
+def load_task():
+    """Take txt file and upload it to s3 bucket."""
+
+    logger = configure_logger()
+    logger.info('Started Load Task for DAG GGUKennedy.')
+    
+    s3_hook = S3Hook(aws_conn_id='aws_s3_bucket')
+    bucket_name = 'alkemy-gg'
+    local_basepath = Path(__file__).resolve().parent.parent
+
+    # Upload to S3 using predefined method
+    txt_path = local_basepath / 'datasets/GGUKennedy_process.txt'
+    s3_hook.load_file(txt_path,
+                        bucket_name=bucket_name,
+                        replace=True,
+                        key='process/GGUKennedy_process.txt')
+
+    logger.info('Finished Load Task for DAG GGUKennedy.')
 
 
 with DAG('GGUKennedy_dag_etl',
@@ -73,10 +93,9 @@ with DAG('GGUKennedy_dag_etl',
                              python_callable=transform_task,
                              retries=5)
 
-    # Load FLACSO data from local txt to S3. Uses LocalFilesystemToS3Operator Operator.
-    load = EmptyOperator(
-                    task_id='load',
-                    retries=5)
+    load = PythonOperator(task_id='load',
+                             python_callable=load_task,
+                             retries=5)
 
     # set task dependencies
     extract >> transform >> load

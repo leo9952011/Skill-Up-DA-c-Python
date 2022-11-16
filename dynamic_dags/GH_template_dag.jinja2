@@ -17,10 +17,10 @@ from plugins.GH_transform import transform_df
 BASE_DIR = Path(__file__).parent.parent
 
 # se normaliza el nombre de la universidad
-university = "Buenos Aires".strip().replace(" ", "")
+university = "{{universidad}}".strip().replace(" ", "")
 
 # Para la convencion del nombre
-name = f"GHUN{university}"
+name = f"G{{grupo}}{{sigla}}{university}"
 
 sql_file_name = f"{name}.sql"
 csv_file_name = f"{name}_select.csv"
@@ -45,7 +45,7 @@ def extract_data():
     query = open(sql_path).read()
 
     # PostgresHook --> DataFrame
-    hook = PostgresHook(postgres_conn_id="alkemy_db")
+    hook = PostgresHook(postgres_conn_id="{{db_conn_id}}")
     df = hook.get_pandas_df(sql=query)
 
     file_path = BASE_DIR / f"files/{csv_file_name}"
@@ -73,10 +73,10 @@ def load_data():
     logger = configure_logger()
     logger.info("Start load task")
 
-    s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
+    s3_hook = S3Hook(aws_conn_id="{{s3_conn_id}}")
     s3_hook.load_file(
         BASE_DIR / f"datasets/{txt_file_name}",
-        bucket_name="alkemy-gh",
+        bucket_name="{{bucket_name}}",
         replace=True,
         key=f"process/{txt_file_name}",
     )
@@ -85,14 +85,15 @@ def load_data():
 
 
 with DAG(
-    "GHUNBuenosAires_dynamic_dag_etl",
+    "{{dag_id}}",
     default_args={
-        "retries": 5,
-        "retry_delay": timedelta(minutes=5),
+        "retries": {{retries}},
+        "retry_delay": {{retry_delay}},
     },
-    description="Realiza un ETL de los datos de la Universidad de Buenos Aires.",
+    description="Realiza un ETL de los datos de la Universidad de {{universidad}}.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 11),
+    start_date={{start_date}},
+    catchup=False,
     tags=["etl"],
 ) as dag:
 

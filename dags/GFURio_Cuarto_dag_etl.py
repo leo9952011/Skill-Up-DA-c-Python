@@ -13,7 +13,6 @@ from plugins.GF_modules.updateS3 import upload_to_s3
 rio_cuarto_sql = r'/usr/local/airflow/include/GFUNRioCuarto.sql'
 rio_cuarto_csv = r'/usr/local/airflow/files/GFUNRioCuarto.csv'
 rio_cuarto_txt = r'/usr/local/airflow/datasets/GFUNRioCuarto.txt'
-
 pc_path = r'/usr/local/airflow/assets/codigos_postales.csv'
 
 def configure_logger():

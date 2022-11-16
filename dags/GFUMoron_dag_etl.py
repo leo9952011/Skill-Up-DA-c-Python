@@ -5,9 +5,9 @@ from datetime import timedelta
 from airflow.utils.dates import days_ago
 from airflow.decorators import (dag, task)
 
-from plugins.mudule_Nz.extract import std_extract
-from plugins.mudule_Nz.transform import std_transform
-from plugins.mudule_Nz.updateS3 import upload_to_s3
+from plugins.GF_modules.extract import std_extract
+from plugins.GF_modules.transform import std_transform
+from plugins.GF_modules.updateS3 import upload_to_s3
 
 from pathlib import Path
 def configure_logger():
@@ -19,9 +19,9 @@ def configure_logger():
 
 
 moron_sql = r'/usr/local/airflow/include/GFUMoron.sql'
-moron_csv = r'/usr/local/airflow/include/GFUMoron.csv'
-moron_txt = r'/usr/local/airflow/include/GFUMoron.txt'
-pc_path = r'/usr/local/airflow/include/codigos_postales.csv'
+moron_csv = r'/usr/local/airflow/files/GFUMoron.csv'
+moron_txt = r'/usr/local/airflow/datasets/GFUMoron.txt'
+pc_path = r'/usr/local/airflow/assets/codigos_postales.csv'
 
 
 

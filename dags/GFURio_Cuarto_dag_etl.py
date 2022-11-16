@@ -69,16 +69,10 @@ def GFURio_Cuarto_dag_etl():
         logger.info('load to s3')
         print(prev_task)
         
-        try:
-            upload_to_s3(rio_cuarto_txt,'RioCuarto')
-            logger.info('load completed')
-            logger.info('------------------------------------------------------')
-        except:
-            logger.critical('transformation failure')
+        upload_to_s3(rio_cuarto_txt,'RioCuarto')
         
         
         
-    transform(extract())
-    load()
+    load(transform(extract()))
 
 GFURio_Cuarto_dag_etl = GFURio_Cuarto_dag_etl()

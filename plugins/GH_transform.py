@@ -99,8 +99,8 @@ def transform_df(input_path, output_path):
         df[column] = df[column].apply(str_normalizer).astype("string")
 
     # Transformacion de gender
-    df["gender"].astype("string").str.lower().replace(
-        {"f": "female", "m": "male"}, inplace=True
+    df["gender"] = (
+        df["gender"].astype("string").str.lower().replace({"f": "female", "m": "male"})
     )
     df["gender"] = df["gender"].map(lambda x: x.lower())
     df["gender"] = df["gender"].astype("category")

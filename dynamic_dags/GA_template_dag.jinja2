@@ -13,7 +13,7 @@ from plugins.GA_modules.ETL_funcs import extract_func, transform_func, \
 
 
 # Constants
-UNIVERSITY_ID = 'GAUNVillaMaria'
+UNIVERSITY_ID = '{{ dag_id }}'
 SQL_PATH = os.path.join(INCLUDE_DIR, f'{UNIVERSITY_ID}.sql')
 CSV_PATH = os.path.join(FILES_DIR, f'{UNIVERSITY_ID}_select.csv')
 TXT_PATH = os.path.join(DATASETS_DIR, f'{UNIVERSITY_ID}_process.txt')
@@ -27,13 +27,13 @@ logger = logging.getLogger(UNIVERSITY_ID)
 with DAG(
     dag_id=f'{UNIVERSITY_ID}_dag_etl',
     description=f'ETL process for {UNIVERSITY_ID}',
-    schedule_interval='@hourly',
-    start_date=datetime(2022, 11, 15, 13)
+    schedule_interval='{{ schedule_interval }}',
+    start_date=datetime(2022, 11, 15, 6)
 ) as dag:
     # Read .sql in INCLUDE_DIR, save data as .csv in FILES_DIR
     extract = PythonOperator(
         task_id='extract_func',
-        retries=5,
+        retries={{ retries }},
         python_callable=extract_func,
         op_kwargs={
             'university_id': UNIVERSITY_ID,
@@ -49,7 +49,7 @@ with DAG(
     # DATASETS_DIR
     transform = PythonOperator(
         task_id='transform_func',
-        retries=5,
+        retries={{ retries }},
         python_callable=transform_func,
         op_kwargs=dict({
             'university_id': UNIVERSITY_ID,
@@ -58,13 +58,13 @@ with DAG(
             'logger': logger,
             'postal_data_path': POSTAL_DATA_PATH
         },
-        **{'to_lower': ['university', 'career', 'last_name', 'location', 'email'], 'replace_underscores': ['university', 'career', 'last_name', 'location'], 'gender': {'M': 'male', 'F': 'female'}, 'date_format': '%d-%b-%y', 'min_age': 15, 'fill': 'postal_code'})
+        **{{ transform_op_kwargs }})
     )
 
     # Load .txt from DATASETS_DIR, upload to S3
     load = PythonOperator(
         task_id='load_func',
-        retries=5,
+        retries={{ retries }},
         python_callable=load_func,
         op_kwargs={
             'university_id': UNIVERSITY_ID,

@@ -1,0 +1,10 @@
+dag_id: 'GAUFlores'
+schedule_interval: '@hourly'
+retries: 5
+transform_op_kwargs: {
+    'to_lower': ['university', 'career', 'last_name', 'email'],
+    'gender': {'M': 'male', 'F': 'female'},
+    'date_format': '%Y-%m-%d',
+    'min_age': 15,
+    'fill': 'location'
+}

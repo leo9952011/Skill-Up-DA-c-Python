@@ -1,0 +1,15 @@
+dag_id: 'GAUNVillaMaria'
+schedule_interval: '@hourly'
+retries: 5
+transform_op_kwargs: {
+    'to_lower': [
+        'university', 'career', 'last_name', 'location', 'email'
+    ],
+    'replace_underscores': [
+        'university', 'career', 'last_name', 'location'
+    ],
+    'gender': {'M': 'male', 'F': 'female'},
+    'date_format': '%d-%b-%y',
+    'min_age': 15,
+    'fill': 'postal_code'
+}

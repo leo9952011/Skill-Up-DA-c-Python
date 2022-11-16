@@ -1,4 +1,4 @@
-dag_id: 'GFURio_Cuarto'
+dag_id: 'GFURioCuarto'
 dateBornSchema: '%d/%m/%Y'
 inscriptionDateSchema: '%d/%m/%Y'
 yyBornDate: True

@@ -32,7 +32,7 @@ def configure_logger():
         'retry_delay': timedelta(minutes=1)
     },
     tags=['DataProcessing'])
-def GFURio_Cuarto_dag_etl():
+def GFURioCuarto_dag_etl():
     
     @task()
     def extract():
@@ -74,4 +74,4 @@ def GFURio_Cuarto_dag_etl():
         
     load(transform(extract()))
 
-GFURio_Cuarto_dag_etl = GFURio_Cuarto_dag_etl()
+GFURioCuarto_dag_etl = GFURioCuarto_dag_etl()

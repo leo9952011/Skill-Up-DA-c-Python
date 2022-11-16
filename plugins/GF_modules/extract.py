@@ -15,13 +15,13 @@ def std_extract(sql_path: PathLike,csv_path : PathLike):
     try:
         with open(sql_path, 'r') as myfile:
             sql_query = myfile.read()
-        hook = PostgresHook(postgres_conn_id='pgconnectionAlkemy')
+        hook = PostgresHook(postgres_conn_id='alkemy_db')
         df = hook.get_pandas_df(sql = sql_query)      
         df.to_csv(csv_path)
-        logging.info('successful sql execution U.N.RIO-CUARTO')
+        logging.info('successful sql execution')
         df = True
     except:
-        logging.warning('sql execution failed U.N.RIO-CUART')
+        logging.warning('sql execution failed')
         pass
     return df
 

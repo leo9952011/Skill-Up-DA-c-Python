@@ -1,7 +1,7 @@
 import pandas as pd
-from datetime import datetime, date 
 from pathlib import Path
 from typing import TypeVar, List
+import numpy as np
 
 PathLike = TypeVar("PathLike", str, Path, None)
 
@@ -22,17 +22,22 @@ def std_transform(
     ############################load Dataframe############################################
     df = pd.read_csv(dfPath,encoding="utf-8")
     
+    ############################normalize inscription_date##################################
+    
+    df['inscription_date'] = pd.to_datetime(df['inscription_date'],format=inscriptionDateSchema)
+    
     ############################set date in model yy/.. example 65/3/27###################
     if yyBornDate:
-        df[bornColname] = df[bornColname].map(lambda x: '19'+ x if int(x[0:2])>20  else '20'+ x)
+        df[bornColname] = df[bornColname].map(lambda x: '19'+ x if int(x[0:2])>5  else '20'+ x)
+    
+    try:
+        df[bornColname] = pd.to_datetime(df[bornColname],format=dateBornSchema)
+    except:
+        pass
     
     ############################age calculus##############################################
     
-    def age(born): 
-        born = datetime.strptime(born,dateBornSchema).date() 
-        today = date.today() 
-        return today.year - born.year - ((today.month,today.day) < (born.month,born.day)) 
-    df['age'] = df[bornColname].apply(age)
+    df['age'] = np.int64(np.floor((df['inscription_date']-df[bornColname]) / np.timedelta64(1, 'Y')))
     
     df = df.drop([bornColname], axis=1)
     
@@ -46,9 +51,7 @@ def std_transform(
     df = df[df['age'] >= minAge]
     df = df[df['age'] <= maxAge]
     
-    ############################normalize inscription_date##################################
     
-    df['inscription_date'] = pd.to_datetime(df['inscription_date'],format=inscriptionDateSchema)
     
     ############################normalize string column#####################################
     

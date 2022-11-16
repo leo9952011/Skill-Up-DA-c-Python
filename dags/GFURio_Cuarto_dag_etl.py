@@ -6,14 +6,15 @@ from airflow.utils.dates import days_ago
 from airflow.decorators import (dag, task)
 from pathlib import Path
 
-from plugins.mudule_Nz.extract import std_extract
-from plugins.mudule_Nz.transform import std_transform
+from plugins.GF_modules.extract import std_extract
+from plugins.GF_modules.transform import std_transform
+from plugins.GF_modules.updateS3 import upload_to_s3
 
 rio_cuarto_sql = r'/usr/local/airflow/include/GFUNRioCuarto.sql'
-rio_cuarto_csv = r'/usr/local/airflow/include/GFUNRioCuarto.csv'
-rio_cuarto_txt = r'/usr/local/airflow/include/GFUNRioCuarto.txt'
+rio_cuarto_csv = r'/usr/local/airflow/files/GFUNRioCuarto.csv'
+rio_cuarto_txt = r'/usr/local/airflow/datasets/GFUNRioCuarto.txt'
 
-pc_path = r'/usr/local/airflow/include/codigos_postales.csv'
+pc_path = r'/usr/local/airflow/assets/codigos_postales.csv'
 
 def configure_logger():
             
@@ -62,11 +63,20 @@ def GFURio_Cuarto_dag_etl():
         return extract
  
     @task()
-    def load():
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
-        logging.info('PandaslOAD')
+    def load(prev_task):
+        logger = configure_logger()
+        
+        logger.info('load to s3')
+        print(prev_task)
+        
+        try:
+            upload_to_s3(rio_cuarto_txt,'RioCuarto')
+            logger.info('load completed')
+            logger.info('------------------------------------------------------')
+        except:
+            logger.critical('transformation failure')
+        
+        
         
     transform(extract())
     load()

@@ -1,0 +1,4 @@
+dag_id: 'GFUMoron'
+dateBornSchema: '%Y/%b/%d'
+inscriptionDateSchema: '%y/%b/%d'
+yyBornDate: False

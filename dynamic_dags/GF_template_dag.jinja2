@@ -1,3 +1,5 @@
+"""ETL DAG for 'Universidad de Moron y Rio Cuarto' (Grupo F)."""
+
 import logging
 import logging.config
 from datetime import timedelta
@@ -14,13 +16,13 @@ def configure_logger():
             
     LOGGING_CONFIG = Path(__file__).parent.parent/"logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger("GFUMoron_dag_etl")
+    logger = logging.getLogger("{{ dag_id }}_dag_etl")
     return logger
 
 
-moron_sql = r'/usr/local/airflow/include/GFUMoron.sql'
-moron_csv = r'/usr/local/airflow/files/GFUMoron.csv'
-moron_txt = r'/usr/local/airflow/datasets/GFUMoron.txt'
+path_sql = r'/usr/local/airflow/include/{{ dag_id }}.sql'
+path_csv = r'/usr/local/airflow/files/{{ dag_id }}.csv'
+path_txt = r'/usr/local/airflow/datasets/{{ dag_id }}.txt'
 pc_path = r'/usr/local/airflow/assets/codigos_postales.csv'
 
 
@@ -34,7 +36,7 @@ pc_path = r'/usr/local/airflow/assets/codigos_postales.csv'
         'retry_delay': timedelta(minutes=1)
     },
     tags=['DataProcessing'])
-def GFUMoron_dag_etl():
+def {{ dag_id }}_dag_etl():
     
     @task()
     def extract():
@@ -43,28 +45,30 @@ def GFUMoron_dag_etl():
         logger.info('extract-init')
         
         
-        return std_extract(moron_sql,moron_csv)
+        return std_extract(path_sql,path_csv)
     @task()
     def transform(extract):
         logger = configure_logger()
         
         if extract:
-            logger.info('preparing Transformation')
+            logger.info('preparing Transformation {{ dag_id }}')
             std_kwargs = {
-                'dfPath':moron_csv,
-                'dateBornSchema': "%d/%m/%Y",
-                'inscriptionDateSchema': "%d/%m/%Y",
+                'dfPath':path_csv,
+                'dateBornSchema': '{{ dateBornSchema }}',
+                'inscriptionDateSchema': '{{ inscriptionDateSchema }}',
                 'minAge': 17,
                 'maxAge': 82,
                 'pathPostalCode': pc_path,
-                'target_file': moron_txt
+                'target_file': path_txt,
+                'yyBornDate':{{ yyBornDate or False }},
+
             }
             try:
                 std_transform(**std_kwargs)
-                logger.info('transformatrion completed')
+                logger.info('transformatrion completed {{ dag_id }}')
                 logger.info('------------------------------------------------------')
             except:
-                logger.critical('transformation failure')
+                logger.critical('transformation failure {{ dag_id }}')
         return extract
 
     @task()
@@ -72,13 +76,12 @@ def GFUMoron_dag_etl():
         logger = configure_logger()
         print(prev_task)
         
-        upload_to_s3(moron_txt,'moron')
+        upload_to_s3(path_txt,'{{ dag_id }}')
         
         
         
         
     load(transform(extract()))
 
-GFUMoron_dag_etl = GFUMoron_dag_etl()
-
+{{ dag_id }}_dag_etl = {{ dag_id }}_dag_etl()
 

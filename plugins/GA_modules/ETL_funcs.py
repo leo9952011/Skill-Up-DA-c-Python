@@ -75,6 +75,10 @@ def transform_func(university_id, csv_path, txt_path, logger, **kwargs):
     inscription year, or because it would result in subjects younger
     than min_age) is assigned to the 20th century.
 
+    For nonambiguous cases (full year), the age is computed by subtrac-
+    ting the birth year to the inscription one, and eliminating ages low-
+    er than min_age.
+
     Parameters
     ----------
     csv_path: string or path object

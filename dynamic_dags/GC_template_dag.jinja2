@@ -51,7 +51,8 @@ def transform_fun():
     },
     description="Realiza un ETL de los datos de la Universidad de {{universidad}}.",
     schedule=timedelta(hours=1),
-    start_date={{start_date}}
+    start_date={{start_date}},
+    catchup=False
 )
 def gcdag():
     @task(task_id='extract', retries = 5)

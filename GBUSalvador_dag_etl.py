@@ -1,27 +1,23 @@
 """
-Story 4
+Story 5
 ## Grupo de Universidades B
 ## USalvador
 
 COMO: Analista de datos
-QUIERO: Implementar Python Operator para Extracción
-PARA: tomar los datos de las bases de datos en el DAG
+QUIERO: Implementar el Python Operator para Transformación
+PARA: procesar los datos obtenidos de la base de datos dentro del DAG
 
-Criterios de aceptacion: 
-Configurar un Python Operator, para que extraiga informacion de la base de datos 
-utilizando el .sql disponible en el repositorio base de las siguientes universidades: 
+Criterios de aceptación: 
+Configurar el Python Operator para que ejecute las dos funciones que procese 
+los datos para las siguientes universidades:
 - Univ. Nacional Del Comahue
 - Universidad Del Salvador
-Dejar la información en un archivo .csv dentro de la carpeta files.
-Documentacion
-https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/python/index.html#module-airflow.operators.python
-Utilizar el provider https://airflow.apache.org/docs/apache-airflow-providers-postgres/stable/_api/airflow/providers/postgres/hooks/postgres/index.html 
-Analizar implementacion sugerida en este post:
-https://stackoverflow.com/questions/72165393/use-result-from-one-operator-inside-another
 
+Documentación
+https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/python/index.html#module-airflow.operators.python"
 
 # Dev: Aldo Agunin
-# Fecha: 07/11/2022
+# Fecha: 11/11/2022
 """
 
 from airflow import DAG
@@ -33,6 +29,7 @@ from pathlib import Path
 import logging
 import logging.config
 import pandas as pd
+from plugins.callables import csv_a_txt
 
 # ------- DECLARACIONES -----------
 universidad_corto = 'USalvador'
@@ -45,8 +42,8 @@ logging.config.fileConfig(configfile, disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 #---------------  extraccion  --------------
-logger.info('*** Comenzando Extracción ***')
 def datos_a_csv():
+    logger.info('*** Comenzando Extracción ***')
     ## Ubicacion del .sql
     sql_path = Path(__file__).parent.parent / 'include' / ('GB' + universidad_corto + '.sql')
     ## Leo el .sql
@@ -58,6 +55,7 @@ def datos_a_csv():
     ## Guardo .csv
     csv_path = Path.cwd() / 'files' / ('GB' + universidad_corto + '_select.csv')
     df.to_csv(csv_path, index=False)
+    logger.info('*** Fin Extraccion ***')
     return
 #------------------------------------------
 
@@ -88,9 +86,14 @@ extract = PythonOperator(
 
 # segunda tarea: procesar datos en pandas
 # se usara un PythonOperator que llame a un modulo externo
-transform = EmptyOperator(
-    task_id="transformation_task",
-    dag=dag
+# transform = EmptyOperator(
+#     task_id="transformation_task",
+#     dag=dag
+#     )
+transform = PythonOperator(
+        task_id='transformation_task',
+        python_callable=csv_a_txt,
+        dag=dag,
     )
 
 # tercera tarea: subir resultados a amazon s3

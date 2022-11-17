@@ -28,7 +28,7 @@ logger_name = f"{name}_dag_etl"
 
 
 def configure_logger():
-    LOG_CONF = PAR_DIR / 'logger.cfg'
+    LOG_CONF = BASE_DIR / 'logger.cfg'
     logging.config.fileConfig(LOG_CONF, disable_existing_loggers=False)
     logger = logging.getLogger(logger_name)
     return logger
@@ -79,7 +79,7 @@ def gcdag():
         s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
         s3_hook.load_file(
             BASE_DIR / f"datasets/{txt_file_name}",
-            bucket_name=alkemy-gc,
+            bucket_name='alkemy-gc',
             replace=True,
             key=f"process/{txt_file_name}"
             )

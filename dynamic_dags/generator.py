@@ -5,7 +5,7 @@ import os
 file_dir = os.path.dirname(os.path.abspath(__file__))
 print(file_dir)
 # LISTA DE GRUPOS
-for grupo in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]:
+for grupo in ["A", "C", "D", "E", "F", "G", "H", "I", "J"]:
 
     env = Environment(loader=FileSystemLoader(file_dir))
     try:

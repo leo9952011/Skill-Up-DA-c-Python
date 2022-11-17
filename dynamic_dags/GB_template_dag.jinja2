@@ -45,7 +45,8 @@ txt_file = txt_path / ('GB{{ unicorto }}_process.txt')
 # ------- LOGGER ------------------
 def configure_logger():
     logger_name = '{{ dag_id }}'
-    logger_cfg = Path.cwd() / 'plugins' / 'GB_logger.cfg'
+    #logger_cfg = Path.cwd() / 'plugins' / 'GB_logger.cfg'
+    logger_cfg = Path.cwd() / 'logger.cfg'
     logging.config.fileConfig(logger_cfg, disable_existing_loggers=False)
     # Set up logger
     logger = logging.getLogger(logger_name)

@@ -51,7 +51,8 @@ def transform_fun():
     },
     description="Realiza un ETL de los datos de la Universidad de Jujuy.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 11)
+    start_date=datetime(2022, 11, 11),
+    catchup=False
 )
 def gcdag():
     @task(task_id='extract', retries = 5)

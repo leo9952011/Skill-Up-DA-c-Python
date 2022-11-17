@@ -274,7 +274,7 @@ def csv_a_txt(univ, in_file, out_file):
     df.drop('_age_ins_2', axis=1, inplace=True)
 
     # Escribo el .txt FINAL
-    df.to_csv(in_file, index=False)
+    df.to_csv(out_file, index=False)
     return
 #------------------------------------------
 

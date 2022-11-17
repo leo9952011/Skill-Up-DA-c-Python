@@ -1,72 +1,89 @@
 """
-Story 2
+Story 4
 ## Grupo de Universidades B
 ## UNComahue
 
 COMO: Analista de datos
-QUIERO: Configurar un DAG, sin consultas, ni procesamiento
-PARA: Hacer un ETL para 2 universidades distintas.
+QUIERO: Implementar Python Operator para Extracción
+PARA: tomar los datos de las bases de datos en el DAG
 
-Criterios de aceptacion:
-Configurar el DAG para procese las siguientes universidades:
+Criterios de aceptacion: 
+Configurar un Python Operator, para que extraiga informacion de la base de datos 
+utilizando el .sql disponible en el repositorio base de las siguientes universidades: 
 - Univ. Nacional Del Comahue
 - Universidad Del Salvador
-Documentar los operators que se deberian utilizar a futuro,
-teniendo en cuenta que se va a hacer dos consultas SQL (una para cada universidad),
- se van a procesar los datos con pandas y se van a cargar los datos en S3.  
-El DAG se debe ejecutar cada 1 hora, todos los dias y cada tarea se debe ejecutar
-5 veces antes de fallar.
+Dejar la información en un archivo .csv dentro de la carpeta files.
+Documentacion
+https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/python/index.html#module-airflow.operators.python
+Utilizar el provider https://airflow.apache.org/docs/apache-airflow-providers-postgres/stable/_api/airflow/providers/postgres/hooks/postgres/index.html 
+Analizar implementacion sugerida en este post:
+https://stackoverflow.com/questions/72165393/use-result-from-one-operator-inside-another
+
 
 # Dev: Aldo Agunin
-# Fecha: 05/11/2022
+# Fecha: 07/11/2022
 """
 
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
-
+from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from pathlib import Path
+import logging
+import logging.config
+import pandas as pd
 
 # ------- DECLARACIONES -----------
-universidad_corto = "UNComahue"
-universidad_largo = "Universidad Nacional del Comahue"
+universidad_corto = 'UNComahue'
+universidad_largo = 'Universidad Nacional del Comahue'
 
-# def function_task_1():
-#     print('Hello World!')
+# ------- LOGGER ------------------
+log_cfg = ('GB' + universidad_corto + '_log.cfg')
+configfile = Path(__file__).parent.parent / 'plugins' / log_cfg
+logging.config.fileConfig(configfile, disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
-# forma alternativa al WITH DAG
-# PENDIENTE Hacerlo con Taskflow (decoradores)
-# https://airflow.apache.org/docs/apache-airflow/stable/tutorial_taskflow_api.html
+#---------------  extraccion  --------------
+logger.info('*** Comenzando Extracción ***')
+def datos_a_csv():
+    ## Ubicacion del .sql
+    sql_path = Path(__file__).parent.parent / 'include' / ('GB' + universidad_corto + '.sql')
+    ## Leo el .sql
+    sql_consulta = open(sql_path, 'r').read()
+    ## Conexion a la base
+    hook = PostgresHook(postgres_conn_id='alkemy_db')
+    conexion = hook.get_conn()
+    df = pd.read_sql(sql_consulta, conexion)
+    ## Guardo .csv
+    csv_path = Path.cwd() / 'files' / ('GB' + universidad_corto + '_select.csv')
+    df.to_csv(csv_path, index=False)
+    return
+#------------------------------------------
+
 dag = DAG(
-    dag_id=f"GB{universidad_corto}_2",   # dag_id="GBUNComahue_2",
-    description=f"DAG para hacer ETL de la {universidad_largo}",
+    dag_id=f'GB{universidad_corto}_dag_etl',   # dag_id='GBUNComahue_dag_etl',
+    description=f'DAG para hacer ETL de la {universidad_largo}',
     tags=['Aldo', 'ETL'],
     start_date=datetime(2022, 11, 1),
     schedule=timedelta(hours=1),  # cada hora
     catchup=False,
     default_args={
-        "retries": 5, # If a task fails, it will retry 5 times.
-        "retry_delay": timedelta(minutes=5),
+        'retries': 5, # If a task fails, it will retry 5 times.
+        'retry_delay': timedelta(minutes=5),
         },
     )
 
-
-# task1 = EmptyOperator(
-#     task_id="task_1", # debe ser único dentro del dag
-#     dag=dag # dag al que pertenece esta tarea
-#     )
-
-# task1 = PythonOperator(
-#     task_id="task_1", # debe ser único dentro del dag
-#     python_callable=function_task_1, # función que se ejecutará
-#     dag=dag # dag al que pertenece esta tarea
-#     )
-
 # primera tarea: correr script .SQL y la salida a .CSV
 # se usara un PythonOperator que ejecute la consulta .SQL de la Story1 y genere salida a .CSV
-extract = EmptyOperator(
-    task_id="extraction_task",
-    dag=dag
+# extract = EmptyOperator(
+#     task_id="extraction_task",
+#     dag=dag
+#     )
+extract = PythonOperator(
+        task_id='extraction_task',
+        python_callable=datos_a_csv,
+        dag=dag,
     )
 
 # segunda tarea: procesar datos en pandas
@@ -84,4 +101,3 @@ load = EmptyOperator(
     )
 
 extract >> transform >> load
-

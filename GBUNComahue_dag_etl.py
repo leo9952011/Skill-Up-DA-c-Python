@@ -1,21 +1,18 @@
 """
-Story 7
-## Grupo de Universidades B
-## UNComahue
-
+S8
 COMO: Analista de datos
-QUIERO: Utilizar un operador creado por la comunidad
-PARA: poder subir el txt creado por el operador de Python al S3
+QUIERO: Arreglar un Dag dinamico
+PARA: Poder ejecutarlos normalmente
 
-Criterios de aceptación: 
-- Tomar el .txt del repositorio base 
-- Buscar un operador creado por la comunidad que se adecue a los datos.
-- Configurar el S3 Operator para la Univ. Nacional Del Comahue
-- Subir el archivo a S3
+Criterios de aceptacion: 
+- El DAG a arreglar es el que procesa las siguientes universidades:
+    - Univ. Nacional Del Comahue
+    - Universidad Del Salvador
+- Se debe arreglar el DAG factory
+- No se debe tocar la logica de procesamiento o negocio"
 
-# Dev: Aldo Agunin
-# Fecha: 15/11/2022
 """
+
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.empty import EmptyOperator
@@ -37,19 +34,19 @@ universidad_largo = 'Universidad Nacional del Comahue'
 root_path = Path.cwd()
 ## Ubicacion de .sql
 sql_path = root_path / 'include'
-sql_file = sql_path / ('GB' + universidad_corto + '.sql')
+sql_file = sql_path / ('GBUNComahue.sql')
 ## Ubicacion de .csv
 csv_path = root_path / 'files'
-csv_file = csv_path / ('GB' + universidad_corto + '_select.csv')
-## Ubicación de.txt
+csv_file = csv_path / ('GBUNComahue_select.csv')
+## Ubicacion de.txt
 txt_path = root_path / 'datasets'
-txt_file = txt_path / ('GB' + universidad_corto + '_process.txt')
+txt_file = txt_path / ('GBUNComahue_process.txt')
 
 # ------- LOGGER ------------------
 def configure_logger():
-    logger_name = 'GB' + universidad_corto + '_dag_etl'
+    logger_name = 'GBUNComahue_dag_etl'
     logger_cfg = Path.cwd() / 'plugins' / 'GB_logger.cfg'
-    logging.config.fileConfig(logger_cfg)
+    logging.config.fileConfig(logger_cfg, disable_existing_loggers=False)
     # Set up logger
     logger = logging.getLogger(logger_name)
     return logger
@@ -63,10 +60,10 @@ def extract_task():
     root_path = Path(__file__).parent.parent
     ## Ubicacion de .sql
     sql_path = root_path / 'include'
-    sql_file = sql_path / ('GB' + universidad_corto + '.sql')
+    sql_file = sql_path / ('GBUNComahue.sql')
     ## Ubicacion de .csv
     csv_path = root_path / 'files'
-    csv_file = csv_path / ('GB' + universidad_corto + '_select.csv')
+    csv_file = csv_path / ('GBUNComahue_select.csv')
 
     ## Leo el .sql
     sql_consulta = open(sql_file, 'r').read()
@@ -79,16 +76,17 @@ def extract_task():
     
     logger.info('*** Fin Extraccion ***')
     return
+
 # ---------------  transformacion  --------------
 def transform_task():
     """ transforma los datos del csv y los guarda en un archivo txt """
     logger = configure_logger()
     logger.info('*** Comenzando Transformacion ***')
     
-    csv_a_txt(univ=universidad_corto, in_file=csv_file, out_file=txt_file)
-    
+    csv_a_txt(univ='UNComahue', in_file=csv_file, out_file=txt_file)    
     logger.info('*** Fin Transformacion ***')
     return
+
 #---------------- carga ----------------------
 def load_task():
     """ carga el txt en un el bucket S3 """
@@ -99,59 +97,28 @@ def load_task():
     s3_hook = S3Hook(aws_conn_id='aws_s3_bucket')
     bucket_name = 'alkemy-gb'
     local_basepath = Path(__file__).resolve().parent.parent
-	#root_path = Path(__file__).parent.parent
-	#root_path = Path.cwd()
-	#logger.info(local_basepath)
     # Upload to S3
     txt_path = local_basepath / 'datasets/GBUNComahue_process.txt'
-	## Ubicación de.txt
-    #txt_path = root_path / 'datasets'
-    #txt_name = ('GB' + universidad_corto + '_process.txt')
-    #txt_file = txt_path / txt_name
-    #logger.info(txt_file)
     s3_hook.load_file(txt_file,
         bucket_name=bucket_name,
         replace=True,
         key='process/GBUNComahue_process.txt')
 
-    logger.info('*** Fin Load  ***')
+    logger.info('*** Fin Load ***')
 
+with DAG('GBUNComahue_dag_etl',
+        start_date=datetime(2022,11,1),
+        catchup=False,
+        schedule_interval='@hourly',
+        ) as dag:
 
-with DAG(
-    dag_id=f'GB{universidad_corto}_dag_etl',   # dag_id='GBUNComahue_dag_etl',
-    description=f'DAG para hacer ETL de la {universidad_largo}',
-    tags=['Aldo', 'ETL'],
-    start_date=datetime(2022, 11, 1),
-    schedule=timedelta(hours=1),  # cada hora
-    catchup=False,
-    default_args={
-        'retries': 5, # If a task fails, it will retry 5 times.
-        'retry_delay': timedelta(minutes=5),
-        }, ) as dag:
+    extract = PythonOperator(task_id='extract',
+                             python_callable=extract_task)
 
-    # primera tarea: correr script .SQL y la salida a .CSV
-    # se usara un PythonOperator que ejecute la consulta .SQL de la Story1 y genere salida a .CSV
-    # extract = EmptyOperator(
-    #     task_id="Extract",
-    #     dag=dag
-    #     )
-    extract = PythonOperator(task_id='Extract', python_callable=extract_task)
+    transform = PythonOperator(task_id='transform',
+                             python_callable=transform_task)
 
-    # segunda tarea: procesar datos en pandas
-    # se usara un PythonOperator que llame a un modulo externo
-    # transform = EmptyOperator(
-    #     task_id="Transform",
-    #     dag=dag
-    #     )
-    transform = PythonOperator(task_id='Transform', python_callable=transform_task)
-
-    # tercera tarea: subir resultados a amazon s3
-    # se usara un operador desarrollado por la comunidad
-    # load = EmptyOperator(
-    #     task_id="Load",
-    #     dag=dag
-    #     )
-    load = PythonOperator(task_id='Load', python_callable=load_task)
+    load = PythonOperator(task_id='load',
+                             python_callable=load_task)
 
     extract >> transform >> load
-    

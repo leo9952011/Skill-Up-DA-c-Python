@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from plugins.transform_data import transform_Jujuy
 from pathlib import Path
 
@@ -35,13 +35,13 @@ def configure_logger():
 
 def transform_fun():
     logger = configure_logger()
-    logger.info('Comienza tarea de transformación en el DAG')
+    logger.info('Comienza tarea de transformacion en el DAG')
 
     input_path = BASE_DIR / f"files/{csv_file_name}"
     output_path = BASE_DIR / f"datasets/{txt_file_name}"
     transform_Jujuy(input_path, output_path)
 
-    logger.info('Finaliza tarea de transformación en el DAG')
+    logger.info('Finaliza tarea de transformacion en el DAG')
 
 @dag(
     "GCUNJujuy",
@@ -58,7 +58,7 @@ def gcdag():
 
     def get_data(**kwargs):
         logger = configure_logger()
-        logger.info('Comienza tarea de extracción en el DAG')
+        logger.info('Comienza tarea de extraccion en el DAG')
         sqlpath = BASE_DIR / f"include/{sql_file_name}"
         with open(sqlpath, 'r') as sqlfile:
             select_query = sqlfile.read()
@@ -67,7 +67,7 @@ def gcdag():
         csvpath = BASE_DIR / f"files/{csv_file_name}"
         df.to_csv(csvpath)
 
-        logger.info('Finaliza tarea de extracción en el DAG')
+        logger.info('Finaliza tarea de extraccion en el DAG')
     
     transform = PythonOperator(task_id='transform_fun', retries = 5, python_callable=transform_fun)
 

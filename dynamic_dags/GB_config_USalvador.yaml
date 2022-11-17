@@ -1,0 +1,5 @@
+dag_id: 'GBUSalvador_dag_etl'
+unicorto: USalvador
+unilargo: 'Universidad del Salvador'
+schedule_interval: '@hourly'
+catchup: False

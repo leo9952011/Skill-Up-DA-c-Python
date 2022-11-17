@@ -1,0 +1,5 @@
+dag_id: 'GBUNComahue_dag_etl'
+unicorto: UNComahue
+unilargo: 'Universidad Nacional del Comahue'
+schedule_interval: '@hourly'
+catchup: False

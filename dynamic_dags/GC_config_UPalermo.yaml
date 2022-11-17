@@ -1,0 +1,13 @@
+dag_id: 'GCUPalermo'
+db_conn_id: 'alkemy_db'
+s3_conn_id: 'aws_s3_bucket'
+bucket_name: 'alkemy-gc'
+
+schedule: hours=1
+retries: 5
+retry_delay: timedelta(minutes=5)
+start_date: datetime(2022, 11, 11)
+
+universidad: 'Palermo'
+sigla: 'U'
+grupo: 'C'

@@ -19,7 +19,7 @@ def configure_logger():
             
     LOGGING_CONFIG = Path(__file__).parent.parent/"logger.cfg"
     logging.config.fileConfig(LOGGING_CONFIG, disable_existing_loggers=False)
-    logger = logging.getLogger("GFURio_Cuarto_dag_etl")
+    logger = logging.getLogger("GFURioCuarto_dag_etl")
     return logger
 
 

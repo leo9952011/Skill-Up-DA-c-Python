@@ -9,7 +9,7 @@ def transform_Palermo(csvpath, txtpath):
     CUR_DIR = Path(__file__).resolve().parent
     PAR_DIR = CUR_DIR.parent
 
-    df_palermo = pd.read_csv(csvpath/'GCUPalermo_select.csv')
+    df_palermo = pd.read_csv(csvpath)
 
     df_palermo = df_palermo.rename(
         columns={'careers': 'career'})
@@ -76,7 +76,7 @@ def transform_Palermo(csvpath, txtpath):
     df_palermo = df_palermo.drop(
         columns={'Unnamed: 0', 'birth_dates'})
 
-    df_palermo.to_csv (txtpath/'GCUpalermo_process.txt')
+    df_palermo.to_csv (txtpath)
     return df_palermo
 
 def transform_Jujuy(csvpath, txtpath):

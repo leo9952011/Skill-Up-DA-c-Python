@@ -83,7 +83,7 @@ def transform_Jujuy(csvpath, txtpath):
 
     CUR_DIR = Path(__file__).resolve().parent
     PAR_DIR = CUR_DIR.parent
-    df_jujuy = pd.read_csv(csvpath/'GCUNjujuy_select.csv')
+    df_jujuy = pd.read_csv(csvpath)
 
     df_cp = pd.read_csv(PAR_DIR/'assets/codigos_postales.csv')
     def edad(nac):
@@ -143,5 +143,5 @@ def transform_Jujuy(csvpath, txtpath):
     df_jujuy = df_jujuy.drop(
         columns={'Unnamed: 0', 'birth_date'})
 
-    df_jujuy.to_csv (txtpath/'GCUNjujuy_process.txt')
+    df_jujuy.to_csv (txtpath)
     return df_jujuy

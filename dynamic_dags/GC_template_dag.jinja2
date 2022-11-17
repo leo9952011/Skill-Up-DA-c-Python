@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
-from plugins.transform_data import transform_Jujuy
+from plugins.transform_data import transform_{{universidad}}
 from pathlib import Path
 
 import logging
@@ -16,10 +16,10 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 BASE_DIR = Path(__file__).parent.parent
 
 # se normaliza el nombre de la universidad
-university = "Jujuy".strip().replace(" ", "")
+university = "{{universidad}}".strip().replace(" ", "")
 
 # Para la convencion del nombre
-name = f"GCUN{university}"
+name = f"G{{grupo}}{{sigla}}{university}"
 
 sql_file_name = f"{name}.sql"
 csv_file_name = f"{name}_select.csv"
@@ -39,19 +39,19 @@ def transform_fun():
 
     input_path = BASE_DIR / f"files/{csv_file_name}"
     output_path = BASE_DIR / f"datasets/{txt_file_name}"
-    transform_Jujuy(input_path, output_path)
+    transform_{{universidad}}(input_path, output_path)
 
     logger.info('Finaliza tarea de transformacion en el DAG')
 
 @dag(
-    "GCUNJujuy",
+    "{{dag_id}}",
     default_args={
-        "retries": 5,
-        "retry_delay": timedelta(minutes=5),
+        "retries": {{retries}},
+        "retry_delay": {{retry_delay}},
     },
-    description="Realiza un ETL de los datos de la Universidad de Jujuy.",
+    description="Realiza un ETL de los datos de la Universidad de {{universidad}}.",
     schedule=timedelta(hours=1),
-    start_date=datetime(2022, 11, 11)
+    start_date={{start_date}}
 )
 def gcdag():
     @task(task_id='extract', retries = 5)
@@ -62,7 +62,7 @@ def gcdag():
         sqlpath = BASE_DIR / f"include/{sql_file_name}"
         with open(sqlpath, 'r') as sqlfile:
             select_query = sqlfile.read()
-        hook = PostgresHook(postgres_conn_id="alkemy_db")
+        hook = PostgresHook(postgres_conn_id="{{db_conn_id}}")
         df = hook.get_pandas_df(sql=select_query)
         csvpath = BASE_DIR / f"files/{csv_file_name}"
         df.to_csv(csvpath)
@@ -76,10 +76,10 @@ def gcdag():
         logger = configure_logger()
         logger.info('Comienza tarea de subida en el DAG')
 
-        s3_hook = S3Hook(aws_conn_id="aws_s3_bucket")
+        s3_hook = S3Hook(aws_conn_id="{{s3_conn_id}}")
         s3_hook.load_file(
             BASE_DIR / f"datasets/{txt_file_name}",
-            bucket_name='alkemy-gc',
+            bucket_name='{{bucket_name}}',
             replace=True,
             key=f"process/{txt_file_name}"
             )

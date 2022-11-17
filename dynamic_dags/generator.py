@@ -10,7 +10,6 @@ for grupo in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]:
     env = Environment(loader=FileSystemLoader(file_dir))
     try:
         template = env.get_template(f"G{grupo}_template_dag.jinja2")
-
     except:
         print(f"No existe un template para el grupo: {grupo}")
 
